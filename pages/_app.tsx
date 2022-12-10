@@ -2,13 +2,21 @@ import { useState } from "react";
 import NextApp, { AppProps, AppContext } from "next/app";
 import { getCookie, setCookie } from "cookies-next";
 import Head from "next/head";
+
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
+import { useColorScheme } from "@mantine/hooks";
+
 import { WalletProvider } from "@suiet/wallet-kit";
+import "@suiet/wallet-kit/style.css";
+import "../components/ConnectButton/suiet-wallet-kit-custom.css";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;
-	const [colorScheme, setColorScheme] = useState<ColorScheme>(props.colorScheme);
+	const preferredColorScheme = useColorScheme("dark", { getInitialValueInEffect: false });
+	const [colorScheme, setColorScheme] = useState<ColorScheme>(
+		props.colorScheme ?? preferredColorScheme
+	);
 
 	const toggleColorScheme = (value?: ColorScheme) => {
 		const nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
@@ -17,6 +25,8 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 			maxAge: 60 * 60 * 24 * 30,
 		});
 	};
+
+	console.log({ preferredColorScheme, saved: props.colorScheme, colorScheme });
 
 	return (
 		<>
@@ -43,6 +53,6 @@ App.getInitialProps = async (appContext: AppContext) => {
 	const appProps = await NextApp.getInitialProps(appContext);
 	return {
 		...appProps,
-		colorScheme: getCookie("mantine-color-scheme", appContext.ctx) || "dark",
+		colorScheme: getCookie("mantine-color-scheme", appContext.ctx),
 	};
 };
