@@ -1,32 +1,29 @@
-import { useState } from "react";
-import NextApp, { AppProps, AppContext } from "next/app";
-import { getCookie, setCookie } from "cookies-next";
-import Head from "next/head";
+import type { ReactElement, ReactNode } from 'react';
+import type { NextPage } from 'next';
+import type { AppContext, AppProps as NextAppProps } from 'next/app';
+import NextApp from 'next/app';
+import { getCookie } from 'cookies-next';
+import Head from 'next/head';
 
-import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
-import { NotificationsProvider } from "@mantine/notifications";
-import { useColorScheme } from "@mantine/hooks";
+import { ColorScheme } from '@mantine/core';
+import '@suiet/wallet-kit/style.css';
+import '../components/ConnectButton/suiet-wallet-kit-custom.css';
+import { Layout } from '../components/layout';
+import { Providers } from '../components/providers';
 
-import { WalletProvider } from "@suiet/wallet-kit";
-import "@suiet/wallet-kit/style.css";
-import "../components/ConnectButton/suiet-wallet-kit-custom.css";
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+	getLayout?: (page: ReactElement) => ReactNode;
+};
 
-export default function App(props: AppProps & { colorScheme: ColorScheme }) {
+type AppProps = NextAppProps & {
+	Component: NextPageWithLayout;
+	colorScheme: ColorScheme;
+};
+
+export default function App(props: AppProps) {
 	const { Component, pageProps } = props;
-	const preferredColorScheme = useColorScheme("dark", { getInitialValueInEffect: false });
-	const [colorScheme, setColorScheme] = useState<ColorScheme>(
-		props.colorScheme ?? preferredColorScheme
-	);
 
-	const toggleColorScheme = (value?: ColorScheme) => {
-		const nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
-		setColorScheme(nextColorScheme);
-		setCookie("mantine-color-scheme", nextColorScheme, {
-			maxAge: 60 * 60 * 24 * 30,
-		});
-	};
-
-	console.log({ preferredColorScheme, saved: props.colorScheme, colorScheme });
+	const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
 
 	return (
 		<>
@@ -36,15 +33,9 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 				<link rel="shortcut icon" href="/favicon.svg" />
 			</Head>
 
-			<ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-				<MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
-					<NotificationsProvider>
-						<WalletProvider>
-							<Component {...pageProps} />
-						</WalletProvider>
-					</NotificationsProvider>
-				</MantineProvider>
-			</ColorSchemeProvider>
+			<Providers colorScheme={props.colorScheme}>
+				{getLayout(<Component {...pageProps} />)}
+			</Providers>
 		</>
 	);
 }
@@ -53,6 +44,6 @@ App.getInitialProps = async (appContext: AppContext) => {
 	const appProps = await NextApp.getInitialProps(appContext);
 	return {
 		...appProps,
-		colorScheme: getCookie("mantine-color-scheme", appContext.ctx),
+		colorScheme: getCookie('mantine-color-scheme', appContext.ctx),
 	};
 };

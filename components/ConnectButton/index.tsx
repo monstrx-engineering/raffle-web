@@ -1,4 +1,5 @@
 /* eslint-disable prefer-const */
+import { ButtonProps } from "@mantine/core";
 import { Button, Menu } from "@mantine/core";
 import { ConnectModal, useWallet } from "@suiet/wallet-kit";
 import { useState } from "react";
@@ -24,12 +25,17 @@ export function WalletAddress() {
 	);
 }
 
-export function SelectWalletButton() {
+export function SelectWalletButton(props: ButtonProps) {
 	const [showModal, setShowModal] = useState(false);
 
 	return (
-		<ConnectModal open={showModal} onOpenChange={(open) => setShowModal(open)}>
-			<Button onClick={() => setShowModal(true)}>Connect Wallet</Button>
+		<ConnectModal open={showModal} onOpenChange={(open: boolean) => setShowModal(open)}>
+			<Button
+				// eslint-disable-next-line react/no-children-prop
+				children="Connect Wallet"
+				{...props}
+				onClick={() => setShowModal(true)}
+			/>
 		</ConnectModal>
 	);
 }

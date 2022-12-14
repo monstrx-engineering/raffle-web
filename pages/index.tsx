@@ -1,134 +1,145 @@
 /* eslint-disable prefer-const */
 import {
-	ActionIcon,
-	AppShell,
 	Button,
-	Center,
-	Container,
-	createStyles,
+	ButtonProps,
+	Card,
 	Flex,
-	Grid,
-	Group,
-	Header,
 	Image,
-	MediaQuery,
+	Input,
 	SimpleGrid,
 	Stack,
+	Table,
 	Text,
-	Textarea,
-	TextInput,
-	Title,
-	useMantineTheme,
-} from "@mantine/core";
-import { useWallet } from "@suiet/wallet-kit";
-import { IconBrandDiscord, IconBrandTwitter } from "@tabler/icons";
-import { ColorSchemeToggle } from "../components/ColorSchemeToggle/ColorSchemeToggle";
-import { ConnectButton, SelectWalletButton } from "../components/ConnectButton";
+} from '@mantine/core';
+import { useWallet } from '@suiet/wallet-kit';
+import { useQuery } from 'react-query';
+import { formatDistanceToNowStrict } from 'date-fns';
 
-let IconButton = ({ size, color, icon: Icon, radius = Math.floor(size / 2), ...props }) => (
-	<ActionIcon {...props} color={color} variant="filled" radius={radius} size={size}>
-		<Icon size={radius - 2} />
-	</ActionIcon>
-);
+import { useCallback, useMemo } from 'react';
+import { useManagerCache } from '@storybook/manager-webpack4/dist/ts3.9/utils/manager-cache';
+import supabase from '../modules/supabase';
 
-function DefaultHeader() {
+import { SelectWalletButton } from '../components/ConnectButton';
+import { Countdown } from '../components/Countdown';
+
+let MAX_ITEMS = 500;
+let SALES_END_DATE = '2023-01-08T05:12:12.000Z';
+
+function WhitelistTable({}: {}) {
+	let query = useQuery({
+		queryKey: ['whitelists'],
+		queryFn: () => supabase.from('whitelists').select(),
+	});
+
+	let whitelists = query.data?.data;
+
 	return (
-		<Header height={60}>
-			<Group sx={{ height: "100%" }} px={20} position="apart">
-				<Group>
-					<Title order={2} mr="sm">
-						SuiMonstrx
-					</Title>
-					<IconButton
-						component="a"
-						href="https://twitter.com/suiMonstrX"
-						target="_blank"
-						color="blue.5"
-						size={32}
-						icon={IconBrandTwitter}
-					/>
-					<IconButton
-						component="a"
-						href="https://discord.gg/aKeuDUyJpy"
-						target="_blank"
-						color="indigo.7"
-						size={32}
-						icon={IconBrandDiscord}
-					/>
-				</Group>
-				<MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-					<Group spacing={6}>
-						<ConnectButton />
-						<ColorSchemeToggle />
-					</Group>
-				</MediaQuery>
-			</Group>
-		</Header>
+		<Table maw={{ lg: 960, 560: 480 }} mt={40}>
+			<thead>
+				<tr>
+					<th>Wallet</th>
+					<th>When</th>
+				</tr>
+			</thead>
+			<tbody>
+				{whitelists?.map(({ id, address, created_at }, i) => (
+					<tr key={id}>
+						<td>{address}</td>
+						<td>{formatDistanceToNowStrict(new Date(created_at))}</td>
+					</tr>
+				))}
+			</tbody>
+		</Table>
 	);
 }
 
-const useStyles = createStyles((theme) => ({
-	wrapper: {
-		padding: theme.spacing.xl * 2.5,
+async function isRegistered(address: string) {
+	return supabase
+		.from('whitelists')
+		.select('*', { count: 'exact', head: true })
+		.eq('address', address)
+		.then(({ count, error }) => {
+			if (error) {
+				console.error(error);
+				throw new Error(error.message);
+			}
 
-		[`@media (max-width: ${theme.breakpoints.sm}px)`]: {
-			padding: theme.spacing.xl * 1.5,
-		},
-	},
+			return (count ?? 0) > 0;
+		});
+}
 
-	form: {
-		backgroundColor: theme.white,
-		padding: theme.spacing.xl,
-		borderRadius: theme.radius.lg,
-		boxShadow: theme.shadows.lg,
-	},
-}));
+async function getRemainingSlots() {
+	return supabase
+		.from('whitelists')
+		.select('*', { count: 'exact', head: true })
+		.then(({ count, error }) => {
+			if (error) {
+				console.error(error);
+				throw new Error(error.message);
+			}
 
-export function Main() {
-	let { classes } = useStyles();
-	let wallet = useWallet();
-
-	return (
-		<div className={classes.wrapper}>
-			<Center>
-				<SimpleGrid
-					maw={{ lg: 960, 560: 480 }}
-					cols={2}
-					spacing={50}
-
-					breakpoints={[{ maxWidth: "lg", cols: 1 }]}
-				>
-					<Image
-						radius="lg"
-						src="https://raffle.aptosglitchlabs.com/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdgkmpl9iw%2Fimage%2Fupload%2Fv1667597404%2F1696_41708f0ac3.png&w=3840&q=75"
-					/>
-
-					<Stack className={classes.form}>
-						<TextInput label="Email" placeholder="your@email.com" required />
-						<TextInput label="Name" placeholder="John Doe" mt="md" />
-						<Flex mt="md">
-							{wallet.connected ? <Button>Claim whitelist</Button> : <SelectWalletButton />}
-						</Flex>
-					</Stack>
-				</SimpleGrid>
-			</Center>
-		</div>
-	);
+			return MAX_ITEMS - (count ?? 0);
+		});
 }
 
 export default function HomePage() {
-	const theme = useMantineTheme();
+	let wallet = useWallet();
+
+	let { data: claimed } = useQuery({
+		queryKey: ['isRegistered', wallet.address],
+		queryFn: () => isRegistered(wallet.address),
+		enabled: wallet.connected,
+	});
+
+	let { data: remaining } = useQuery({
+		queryKey: ['remaining'],
+		queryFn: () => getRemainingSlots(),
+	});
+
+	const claimWhitelist = useCallback(async () => {
+		if (wallet.connected && wallet.address) {
+			return supabase.from('whitelists').insert({ address: wallet.address });
+		}
+		return Promise.reject();
+	}, [wallet.connected, wallet.address]);
+
+	let buttonProps: ButtonProps = { size: 'lg', color: 'cyan' };
+	let button = wallet.connected ? (
+		<Button {...buttonProps} onClick={claimWhitelist} disabled={claimed}>
+			{claimed ? 'Claimed!' : 'Claim whitelist'}
+		</Button>
+	) : (
+		<SelectWalletButton {...buttonProps}>Connect Wallet to Claim</SelectWalletButton>
+	);
 
 	return (
-		<AppShell
-			styles={{
-				main: {
-					background: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
-				},
-			}}
-			header={<DefaultHeader />}
-		>
-			<Main />
-		</AppShell>
+		<Flex p={60} align="center" direction="column">
+			<SimpleGrid
+				maw={{ lg: 960, 560: 480 }}
+				cols={2}
+				spacing={50}
+				breakpoints={[{ maxWidth: 'lg', cols: 1 }]}
+			>
+				<Image radius="lg" src={process.env.NEXT_PUBLIC_ARTWORK_URL} />
+
+				<Card radius="lg" p="lg">
+					<Stack py={{ lg: 20, 560: 0 }} justify="space-between">
+						<Stack spacing="xs">
+							<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
+							<Countdown date={SALES_END_DATE} />
+						</Stack>
+
+						<Stack spacing="xs" align="center">
+							<Input.Label>Slots Remaining</Input.Label>
+							<Text>{`${String(remaining).padStart(3, '0')}/${MAX_ITEMS}`}</Text>
+						</Stack>
+
+						{button}
+					</Stack>
+				</Card>
+			</SimpleGrid>
+
+			<WhitelistTable />
+		</Flex>
 	);
 }
