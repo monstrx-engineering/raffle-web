@@ -16,19 +16,18 @@ import { useQuery } from 'react-query';
 import { formatDistanceToNowStrict } from 'date-fns';
 
 import { useCallback, useMemo } from 'react';
-import { useManagerCache } from '@storybook/manager-webpack4/dist/ts3.9/utils/manager-cache';
-import supabase from '../modules/supabase';
+import supabase from '~/lib/supabase';
 
-import { SelectWalletButton } from '../components/ConnectButton';
-import { Countdown } from '../components/Countdown';
+import { SelectWalletButton } from '~/components/ConnectButton';
+import { Countdown } from '~/components/Countdown';
 
 let MAX_ITEMS = 500;
 let SALES_END_DATE = '2023-01-08T05:12:12.000Z';
 
-function WhitelistTable({}: {}) {
+function WhitelistTable({ raffleId }: { raffleId: number }) {
 	let query = useQuery({
 		queryKey: ['whitelists'],
-		queryFn: () => supabase.from('whitelists').select(),
+		queryFn: () => supabase.from('whitelist').select().eq('raffle_id', raffleId),
 	});
 
 	let whitelists = query.data?.data;
@@ -55,7 +54,7 @@ function WhitelistTable({}: {}) {
 
 async function isRegistered(address: string) {
 	return supabase
-		.from('whitelists')
+		.from('whitelist')
 		.select('*', { count: 'exact', head: true })
 		.eq('address', address)
 		.then(({ count, error }) => {
@@ -70,7 +69,7 @@ async function isRegistered(address: string) {
 
 async function getRemainingSlots() {
 	return supabase
-		.from('whitelists')
+		.from('whitelist')
 		.select('*', { count: 'exact', head: true })
 		.then(({ count, error }) => {
 			if (error) {
@@ -87,7 +86,7 @@ export default function HomePage() {
 
 	let { data: claimed } = useQuery({
 		queryKey: ['isRegistered', wallet.address],
-		queryFn: () => isRegistered(wallet.address),
+		queryFn: () => isRegistered(wallet.address!),
 		enabled: wallet.connected,
 	});
 
@@ -98,7 +97,7 @@ export default function HomePage() {
 
 	const claimWhitelist = useCallback(async () => {
 		if (wallet.connected && wallet.address) {
-			return supabase.from('whitelists').insert({ address: wallet.address });
+			return supabase.from('whitelist').insert({ address: wallet.address });
 		}
 		return Promise.reject();
 	}, [wallet.connected, wallet.address]);

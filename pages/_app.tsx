@@ -2,14 +2,14 @@ import type { ReactElement, ReactNode } from 'react';
 import type { NextPage } from 'next';
 import type { AppContext, AppProps as NextAppProps } from 'next/app';
 import NextApp from 'next/app';
-import { getCookie } from 'cookies-next';
 import Head from 'next/head';
-
+import { getCookie } from 'cookies-next';
 import { ColorScheme } from '@mantine/core';
+import { Layout } from '~/components/layout';
+import { Providers } from '~/components/providers';
+
 import '@suiet/wallet-kit/style.css';
 import '../components/ConnectButton/suiet-wallet-kit-custom.css';
-import { Layout } from '../components/layout';
-import { Providers } from '../components/providers';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 	getLayout?: (page: ReactElement) => ReactNode;

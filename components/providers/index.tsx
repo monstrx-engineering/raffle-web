@@ -4,7 +4,7 @@ import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core
 import { setCookie } from 'cookies-next';
 import { NotificationsProvider } from '@mantine/notifications';
 import { WalletProvider } from '@suiet/wallet-kit';
-import { ReactQueryProvider } from '../../modules/react-query';
+import { ReactQueryProvider } from '~/lib/react-query';
 
 export function Providers(props: PropsWithChildren<{ colorScheme: ColorScheme }>) {
 	const preferredColorScheme = useColorScheme('dark', { getInitialValueInEffect: false });
