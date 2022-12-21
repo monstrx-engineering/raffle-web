@@ -4,9 +4,14 @@ import type { AppContext, AppProps as NextAppProps } from 'next/app';
 import NextApp from 'next/app';
 import Head from 'next/head';
 import { getCookie } from 'cookies-next';
-import { ColorScheme } from '@mantine/core';
 import { Layout } from '~/components/layout';
-import { Providers } from '~/components/providers';
+import { useState } from 'react';
+import { useColorScheme } from '@mantine/hooks';
+import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
+import { setCookie } from 'cookies-next';
+import { NotificationsProvider } from '@mantine/notifications';
+import { WalletProvider } from '@suiet/wallet-kit';
+import { ReactQueryProvider } from '~/lib/react-query';
 
 import '@suiet/wallet-kit/style.css';
 import '../components/ConnectButton/suiet-wallet-kit-custom.css';
@@ -25,6 +30,19 @@ export default function App(props: AppProps) {
 
 	const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
 
+	const preferredColorScheme = useColorScheme('dark', { getInitialValueInEffect: false });
+	const [colorScheme, setColorScheme] = useState<ColorScheme>(
+		props.colorScheme ?? preferredColorScheme
+	);
+
+	const toggleColorScheme = (value?: ColorScheme) => {
+		const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
+		setColorScheme(nextColorScheme);
+		setCookie('mantine-color-scheme', nextColorScheme, {
+			maxAge: 60 * 60 * 24 * 30,
+		});
+	};
+
 	return (
 		<>
 			<Head>
@@ -33,9 +51,15 @@ export default function App(props: AppProps) {
 				<link rel="shortcut icon" href="/favicon.svg" />
 			</Head>
 
-			<Providers colorScheme={props.colorScheme}>
-				{getLayout(<Component {...pageProps} />)}
-			</Providers>
+			<ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+				<MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
+					<NotificationsProvider>
+						<ReactQueryProvider>
+							<WalletProvider>{getLayout(<Component {...pageProps} />)}</WalletProvider>
+						</ReactQueryProvider>
+					</NotificationsProvider>
+				</MantineProvider>
+			</ColorSchemeProvider>
 		</>
 	);
 }

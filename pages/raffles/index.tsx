@@ -1,10 +1,8 @@
 import { Button, Group, SimpleGrid, Stack, Title } from '@mantine/core';
-import React from 'react';
-import { useQuery } from 'react-query';
 import Link from 'next/link';
+import { useQuery } from 'react-query';
 import { RaffleCard } from '~/src/features/raffle-list/components/RaffleCard';
-import { getRaffles } from '~/src/services';
-import supabase from '~/lib/supabase';
+import { getRaffles, RafflesResponse } from '~/src/services';
 
 export type chain = 'SUI' | 'APTOS';
 
@@ -23,10 +21,7 @@ class Price {
 }
 
 export default function RaffleListPage() {
-	const { data: raffles } = useQuery({
-		queryKey: ['raffles'],
-		queryFn: () => supabase.from('raffle').select(),
-	});
+	const { data: raffles } = useQuery<RafflesResponse>(['raffles'], getRaffles);
 
 	return (
 		<Stack p={60}>
@@ -45,8 +40,13 @@ export default function RaffleListPage() {
 					{ minWidth: 'lg', cols: 4 },
 				]}
 			>
-				{raffles?.data.map((raffle) => (
-					<Link href={`raffles/${raffle.id}`}>
+				{raffles?.data?.map((raffle) => (
+					<Link
+						href={{
+							pathname: '/raffle',
+							query: { id: raffle.id },
+						}}
+					>
 						<RaffleCard
 							name={raffle.name}
 							chain={raffle.chain}

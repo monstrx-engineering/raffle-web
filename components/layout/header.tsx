@@ -1,8 +1,8 @@
 /* eslint-disable prefer-const */
-import { ActionIcon, Group, Header, MediaQuery, Title } from "@mantine/core";
-import { IconBrandDiscord, IconBrandTwitter } from "@tabler/icons";
-import { ColorSchemeToggle } from "../ColorSchemeToggle/ColorSchemeToggle";
-import { ConnectButton } from "../ConnectButton";
+import { ActionIcon, Group, Header, MediaQuery, Title } from '@mantine/core';
+import { IconBrandDiscord, IconBrandTwitter } from '@tabler/icons';
+import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { ConnectButton } from '../ConnectButton';
 
 let IconButton = ({ size, color, icon: Icon, radius = Math.floor(size / 2), ...props }) => (
 	<ActionIcon {...props} color={color} variant="filled" radius={radius} size={size}>
@@ -13,7 +13,7 @@ let IconButton = ({ size, color, icon: Icon, radius = Math.floor(size / 2), ...p
 export function DefaultHeader() {
 	return (
 		<Header height={60}>
-			<Group sx={{ height: "100%" }} px={20} position="apart">
+			<Group sx={{ height: '100%' }} px={20} position="apart">
 				<Group>
 					<Title order={2} mr="sm">
 						SuiMonstrx
@@ -35,7 +35,7 @@ export function DefaultHeader() {
 						icon={IconBrandDiscord}
 					/>
 				</Group>
-				<MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+				<MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
 					<Group spacing={6}>
 						<ConnectButton />
 						<ColorSchemeToggle />

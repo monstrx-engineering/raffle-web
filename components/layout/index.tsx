@@ -1,7 +1,7 @@
-import { AppShell, useMantineTheme } from "@mantine/core";
-import type { ReactNode } from "react";
+import { AppShell, useMantineTheme } from '@mantine/core';
+import type { ReactNode } from 'react';
 
-import { DefaultHeader } from "./header";
+import { DefaultHeader } from './header';
 
 export function Layout({ children }: { children: ReactNode }) {
 	const theme = useMantineTheme();
@@ -10,7 +10,7 @@ export function Layout({ children }: { children: ReactNode }) {
 		<AppShell
 			styles={{
 				main: {
-					background: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+					background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
 				},
 			}}
 			header={<DefaultHeader />}

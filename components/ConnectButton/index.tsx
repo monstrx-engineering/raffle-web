@@ -1,8 +1,8 @@
 /* eslint-disable prefer-const */
-import { ButtonProps } from "@mantine/core";
-import { Button, Menu } from "@mantine/core";
-import { ConnectModal, useWallet } from "@suiet/wallet-kit";
-import { useState } from "react";
+import { ButtonProps } from '@mantine/core';
+import { Button, Menu } from '@mantine/core';
+import { ConnectModal, useWallet } from '@suiet/wallet-kit';
+import { useState } from 'react';
 
 let truncate = (words: string) => {
 	const front = words.substring(0, 6);
