@@ -2,26 +2,15 @@ import { Button, Group, SimpleGrid, Stack, Title } from '@mantine/core';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
 import { RaffleCard } from '~/src/features/raffle-list/components/RaffleCard';
-import { getRaffles, RafflesResponse } from '~/src/services';
+import { getRaffles, queryKeys } from '~/src/services';
 
 export type chain = 'SUI' | 'APTOS';
 
-class Price {
-	value: string;
-	currency: string;
-
-	constructor(value: string, symbol: string) {
-		this.value = value;
-		this.currency = symbol;
-	}
-
-	toString() {
-		return `${this.value} ${this.currency}`;
-	}
-}
-
 export default function RaffleListPage() {
-	const { data: raffles } = useQuery<RafflesResponse>(['raffles'], getRaffles);
+	const { data: raffles } = useQuery({
+		queryKey: queryKeys.raffles,
+		queryFn: getRaffles,
+	});
 
 	return (
 		<Stack p={60}>

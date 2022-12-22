@@ -1,6 +1,5 @@
 /* eslint-disable prefer-const */
-import { ButtonProps } from '@mantine/core';
-import { Button, Menu } from '@mantine/core';
+import { Button, ButtonProps, Menu } from '@mantine/core';
 import { ConnectModal, useWallet } from '@suiet/wallet-kit';
 import { useState } from 'react';
 
