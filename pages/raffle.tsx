@@ -13,15 +13,14 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
-import { IconArrowBack, IconCheck, IconCircleX, IconX } from '@tabler/icons';
+import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useCallback } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
 import supabase from '~/lib/supabase';
-import { getRaffle, getRemainingSlots, isRegistered } from '~/src/services';
+import { getRaffle, getRemainingSlots, isRegistered, queries } from '~/src/services';
 
 const getWhitelistByRaffleId = (raffleId: string) => {
 	return supabase
@@ -40,7 +39,7 @@ const getWhitelistByRaffleId = (raffleId: string) => {
 
 function WhitelistTable({ raffleId }: { raffleId: string }) {
 	let { data: whitelists } = useQuery({
-		queryKey: ['whitelists', { raffleId }],
+		queryKey: queries.whitelists.byRaffleId(raffleId),
 		queryFn: () => getWhitelistByRaffleId(raffleId),
 	});
 
@@ -69,8 +68,7 @@ function RaffleDetail({ id }: { id: string }) {
 	let queryClient = useQueryClient();
 
 	let { data: raffle } = useQuery({
-		queryKey: ['raffle', { id }],
-		queryFn: () => getRaffle(id),
+		...queries.raffles.detail(id),
 		select: ({ data }) => data,
 	});
 
@@ -117,7 +115,7 @@ function RaffleDetail({ id }: { id: string }) {
 			throw Object.assign(new Error(), response.error);
 		},
 		onSuccess: () => {
-			queryClient.refetchQueries({ queryKey: ['whitelists', { raffleId: raffle.id }] });
+			queryClient.refetchQueries({ queryKey: queries.whitelists.byRaffleId(id).queryKey });
 			queryClient.refetchQueries({ queryKey: ['isRegistered', { id, address: wallet.address! }] });
 			queryClient.refetchQueries({ queryKey: ['remaining', { id }] });
 		},
