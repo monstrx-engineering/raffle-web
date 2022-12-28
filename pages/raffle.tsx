@@ -14,32 +14,24 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
 import supabase from '~/lib/supabase';
-import { getRaffle, getRemainingSlots, isRegistered, queries } from '~/src/services';
-
-const getWhitelistByRaffleId = (raffleId: string) => {
-	return supabase
-		.from('whitelist')
-		.select()
-		.eq('raffle_id', raffleId)
-		.order('created_at', { ascending: false })
-		.then((response) => {
-			if (response.error) {
-				throw Object.assign(new Error(), response.error);
-			} else {
-				return response.data;
-			}
-		});
-};
+import {
+	WhitelistResponse,
+	WhitelistResponseError,
+	getWhitelistByRaffleId,
+	isRegistered,
+	queries,
+} from '~/src/services';
 
 function WhitelistTable({ raffleId }: { raffleId: string }) {
-	let { data: whitelists } = useQuery({
-		queryKey: queries.whitelists.byRaffleId(raffleId),
+	let { data: whitelists } = useQuery<unknown, WhitelistResponseError, WhitelistResponse>({
+		...queries.whitelists.byRaffleId(raffleId),
 		queryFn: () => getWhitelistByRaffleId(raffleId),
 	});
 
@@ -52,7 +44,7 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 				</tr>
 			</thead>
 			<tbody>
-				{whitelists?.map(({ id, address, created_at }, i) => (
+				{whitelists?.data?.map(({ id, address, created_at }, i) => (
 					<tr key={id}>
 						<td>{address}</td>
 						<td>{formatDistanceToNowStrict(new Date(created_at))}</td>
@@ -65,7 +57,6 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 
 function RaffleDetail({ id }: { id: string }) {
 	let wallet = useWallet();
-	let queryClient = useQueryClient();
 
 	let { data: raffle } = useQuery({
 		...queries.raffles.detail(id),
@@ -73,17 +64,12 @@ function RaffleDetail({ id }: { id: string }) {
 	});
 
 	let { data: claimed } = useQuery({
-		queryKey: ['isRegistered', { id, address: wallet.address! }],
-		queryFn: () => isRegistered(id, wallet.address!),
-		enabled: wallet.connected,
+		queryKey: ['isRegistered', { id, address: wallet.address }],
+		queryFn: () => isRegistered(id, wallet.address),
+		enabled: !!wallet.address,
 	});
 
-	let { data: remaining } = useQuery({
-		queryKey: ['remaining', { id }],
-		queryFn: () => getRemainingSlots(id),
-		enabled: !!raffle,
-		select: (count) => raffle.ticket_max - count,
-	});
+	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
 	let { mutate: claimWhitelist } = useMutation({
 		mutationFn: async () => {
@@ -92,7 +78,7 @@ function RaffleDetail({ id }: { id: string }) {
 			}
 
 			let response = await supabase
-				.from('whitelist')
+				.from('participant')
 				.insert({ raffle_id: id, address: wallet.address });
 
 			if (!response.error) {
@@ -104,20 +90,17 @@ function RaffleDetail({ id }: { id: string }) {
 				});
 				return response;
 			}
-
-			let message = response.error.details;
 			showNotification({
 				title: 'Error',
-				message,
+				message: response.error.details,
 				color: 'red',
 				icon: <IconX />,
 			});
 			throw Object.assign(new Error(), response.error);
 		},
 		onSuccess: () => {
-			queryClient.refetchQueries({ queryKey: queries.whitelists.byRaffleId(id).queryKey });
-			queryClient.refetchQueries({ queryKey: ['isRegistered', { id, address: wallet.address! }] });
-			queryClient.refetchQueries({ queryKey: ['remaining', { id }] });
+			// TODO: refetch whitelist table
+			// TODO: refetch remaining tickets
 		},
 	});
 

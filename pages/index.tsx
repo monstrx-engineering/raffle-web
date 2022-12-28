@@ -29,29 +29,39 @@ export default function RaffleListPage() {
 					{ minWidth: 'lg', cols: 4 },
 				]}
 			>
-				{raffles?.data?.map((raffle) => (
-					<Link
-						href={{
-							pathname: '/raffle',
-							query: { id: raffle.id },
-						}}
-					>
-						<RaffleCard
-							name={raffle.name || ''}
-							chain={raffle.chain || ''}
-							image={raffle.image || ''}
-							sales={{
-								price: raffle.ticket_price,
-								supply: { remaining: 1, max: raffle.ticket_max },
-								endDate: new Date(raffle.end_tz || 0),
+				{raffles?.data?.map((raffle) => {
+					let remaining = 0;
+					if ([raffle.ticket_max, raffle.ticket_sold].every(Number.isInteger)) {
+						remaining = raffle.ticket_max! - raffle.ticket_sold!;
+					}
+
+					return (
+						<Link
+							href={{
+								pathname: '/raffle',
+								query: { id: raffle.id },
 							}}
-							creator={{
-								name: raffle.creator_name,
-								avatar: raffle.creator_avatar,
-							}}
-						/>
-					</Link>
-				))}
+						>
+							<RaffleCard
+								name={raffle.name || ''}
+								chain={raffle.chain || ''}
+								image={raffle.image || ''}
+								sales={{
+									price: raffle.ticket_price,
+									supply: {
+										remaining,
+										max: raffle.ticket_max,
+									},
+									endDate: new Date(raffle.end_tz || 0),
+								}}
+								creator={{
+									name: raffle.creator_name,
+									avatar: raffle.creator_avatar,
+								}}
+							/>
+						</Link>
+					);
+				})}
 			</SimpleGrid>
 		</Stack>
 	);
