@@ -53,12 +53,12 @@ export const RaffleCard = createPolymorphicComponent<'div', RaffleCardProps>(
 						</Group>
 
 						<Stack spacing={0} align="center">
-							<Text size={10} c="gray.6">
+							{/* <Text size={10} c="gray.6">
 								Tickets Remaining
 							</Text>
 							<Text size={14} fw={700}>
 								{sales.supply.remaining}/{sales.supply.max}
-							</Text>
+							</Text> */}
 						</Stack>
 					</Stack>
 				</Card>
