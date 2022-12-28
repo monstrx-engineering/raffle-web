@@ -147,7 +147,7 @@ function RaffleDetail({ id }: { id: string }) {
 						</Stack>
 
 						<Stack spacing="xs" align="center">
-							<Input.Label>Slots Remaining</Input.Label>
+							<Input.Label>Tickets Remaining</Input.Label>
 							<Text>{`${String(remaining).padStart(3, '0')}/${raffle?.ticket_max}`}</Text>
 						</Stack>
 
