@@ -1,16 +1,15 @@
-import type { ReactElement, ReactNode } from 'react';
+import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
+import { useColorScheme } from '@mantine/hooks';
+import { NotificationsProvider } from '@mantine/notifications';
+import { WalletProvider } from '@suiet/wallet-kit';
+import { getCookie, setCookie } from 'cookies-next';
 import type { NextPage } from 'next';
 import type { AppContext, AppProps as NextAppProps } from 'next/app';
 import NextApp from 'next/app';
 import Head from 'next/head';
-import { getCookie } from 'cookies-next';
-import { Layout } from '~/components/layout';
+import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
-import { useColorScheme } from '@mantine/hooks';
-import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
-import { setCookie } from 'cookies-next';
-import { NotificationsProvider } from '@mantine/notifications';
-import { WalletProvider } from '@suiet/wallet-kit';
+import { Layout } from '~/components/layout';
 import { ReactQueryProvider } from '~/lib/react-query';
 
 import '@suiet/wallet-kit/style.css';
