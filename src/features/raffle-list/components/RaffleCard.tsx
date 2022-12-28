@@ -9,8 +9,7 @@ import {
 	Title,
 } from '@mantine/core';
 import React, { forwardRef } from 'react';
-// eslint-disable-next-line
-import { Creator, Sales } from './/src/types/raffle';
+import { Creator, Sales } from '~/src/types/raffle';
 
 export type RaffleCardProps = {
 	name: string;
@@ -53,12 +52,12 @@ export const RaffleCard = createPolymorphicComponent<'div', RaffleCardProps>(
 						</Group>
 
 						<Stack spacing={0} align="center">
-							{/* <Text size={10} c="gray.6">
+							<Text size={10} c="gray.6">
 								Tickets Remaining
 							</Text>
 							<Text size={14} fw={700}>
 								{sales.supply.remaining}/{sales.supply.max}
-							</Text> */}
+							</Text>
 						</Stack>
 					</Stack>
 				</Card>
