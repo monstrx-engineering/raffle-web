@@ -35,13 +35,24 @@ export const getRemainingSlots = (raffle_id: string) => {
 		});
 };
 
-export const getWhitelistByRaffleId = (raffle_id: string) => {
-	return supabase
+export type Pagination = {
+	from: number;
+	to: number;
+};
+
+export const getWhitelistByRaffleId = (raffle_id: string, pagination?: Pagination) => {
+	let query = supabase
 		.from('participant')
-		.select()
+		.select('*', { count: 'estimated' })
 		.match({ raffle_id })
 		.order('created_at', { ascending: false })
 		.throwOnError();
+
+	if (pagination) {
+		query = query.range(pagination.from, pagination.to);
+	}
+
+	return query;
 };
 
 export type WhitelistResponse = Awaited<ReturnType<typeof getWhitelistByRaffleId>>;

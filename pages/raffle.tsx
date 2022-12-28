@@ -6,6 +6,7 @@ import {
 	Flex,
 	Image,
 	Input,
+	Pagination,
 	SimpleGrid,
 	Stack,
 	Table,
@@ -17,7 +18,7 @@ import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
 import supabase from '~/lib/supabase';
@@ -29,29 +30,44 @@ import {
 	queries,
 } from '~/src/services';
 
+let itemsPerPage = 5;
+const getPagination = (page) => ({
+	from: (page - 1) * itemsPerPage,
+	to: page * itemsPerPage,
+});
+
 function WhitelistTable({ raffleId }: { raffleId: string }) {
+	let [page, setPage] = useState(1);
+
 	let { data: whitelists } = useQuery<unknown, WhitelistResponseError, WhitelistResponse>({
 		...queries.whitelists.byRaffleId(raffleId),
-		queryFn: () => getWhitelistByRaffleId(raffleId),
+		queryFn: () => getWhitelistByRaffleId(raffleId, getPagination(page)),
 	});
 
+	let totalItems = whitelists?.count;
+	let totalPages = Math.floor(totalItems ?? 0 / itemsPerPage);
+
 	return (
-		<Table maw={{ lg: 960, 560: 480 }} mt={40}>
-			<thead>
-				<tr>
-					<th>Wallet</th>
-					<th>When</th>
-				</tr>
-			</thead>
-			<tbody>
-				{whitelists?.data?.map(({ id, address, created_at }, i) => (
-					<tr key={id}>
-						<td>{address}</td>
-						<td>{formatDistanceToNowStrict(new Date(created_at))}</td>
+		<>
+			<Table maw={{ lg: 960, 560: 480 }} mt={40} mb="md">
+				<thead>
+					<tr>
+						<th>Wallet</th>
+						<th>When</th>
 					</tr>
-				))}
-			</tbody>
-		</Table>
+				</thead>
+				<tbody>
+					{whitelists?.data?.map(({ address, created_at }, i) => (
+						<tr key={address}>
+							<td>{(page - 1) * itemsPerPage + (i + 1)}</td>
+							<td>{address}</td>
+							<td>{formatDistanceToNowStrict(new Date(created_at))}</td>
+						</tr>
+					))}
+				</tbody>
+			</Table>
+			<Pagination total={totalPages} onChange={setPage} />
+		</>
 	);
 }
 
@@ -72,35 +88,31 @@ function RaffleDetail({ id }: { id: string }) {
 	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
 	let { mutate: claimWhitelist } = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (e) => {
 			if (!(wallet.connected && wallet.address)) {
 				return Promise.reject();
 			}
 
-			let response = await supabase
-				.from('participant')
-				.insert({ raffle_id: id, address: wallet.address });
+			return supabase.from('participant').insert({ raffle_id: id, address: wallet.address });
+		},
+		onSuccess: (data) => {
+			showNotification({
+				title: 'Success',
+				message: `Whitelist claimed!`,
+				color: 'green',
+				icon: <IconCheck />,
+			});
 
-			if (!response.error) {
-				showNotification({
-					title: 'Success',
-					message: `Whitelist claimed!`,
-					color: 'green',
-					icon: <IconCheck />,
-				});
-				return response;
-			}
+			// TODO: refetch whitelist table
+			// TODO: refetch remaining tickets
+		},
+		onError: (error) => {
 			showNotification({
 				title: 'Error',
-				message: response.error.details,
+				message: JSON.stringify(error),
 				color: 'red',
 				icon: <IconX />,
 			});
-			throw Object.assign(new Error(), response.error);
-		},
-		onSuccess: () => {
-			// TODO: refetch whitelist table
-			// TODO: refetch remaining tickets
 		},
 	});
 
@@ -139,7 +151,12 @@ function RaffleDetail({ id }: { id: string }) {
 								Connect Wallet to Claim
 							</SelectWalletButton>
 						) : (
-							<Button size="lg" color="cyan" onClick={claimWhitelist} disabled={claimed}>
+							<Button
+								size="lg"
+								color="cyan"
+								onClick={claimWhitelist}
+								disabled={!wallet.address || claimed}
+							>
 								{claimed ? 'Claimed!' : 'Claim whitelist'}
 							</Button>
 						)}
