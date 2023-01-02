@@ -15,7 +15,7 @@ specifiers:
   '@next/bundle-analyzer': ^12.3.1
   '@next/eslint-plugin-next': ^12.1.4
   '@storybook/react': ^6.5.13
-  '@suiet/wallet-kit': ^0.1.10
+  '@suiet/wallet-kit': ^0.1.11
   '@supabase/supabase-js': ^2.2.1
   '@tabler/icons': ^1.107.0
   '@tanstack/react-query': ^4.20.4
@@ -70,7 +70,7 @@ dependencies:
   '@mantine/notifications': 5.9.0_dbnsmpi6hl37tbib3zr3juzfpq
   '@mantine/prism': 5.9.0_dbnsmpi6hl37tbib3zr3juzfpq
   '@next/bundle-analyzer': 12.3.4
-  '@suiet/wallet-kit': 0.1.10_rj7ozvcq3uehdlnj3cbwzbi5ce
+  '@suiet/wallet-kit': 0.1.11_rj7ozvcq3uehdlnj3cbwzbi5ce
   '@supabase/supabase-js': 2.2.1
   '@tabler/icons': 1.116.1_biqbaboplfbrettd7655fr4n2y
   '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
@@ -2165,6 +2165,29 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@mysten/sui.js/0.20.0:
+    resolution: {integrity: sha512-U25eSGKT08XPCRKHbrvDYlylOSAIQASMKKwnreC8vT3ukvQg1NwTX+SFZPvX+xsLZGS2b3yOQ2Uzhzho5/OIWA==}
+    engines: {node: '>=16'}
+    dependencies:
+      '@mysten/bcs': 0.5.0
+      '@noble/hashes': 1.1.4
+      '@noble/secp256k1': 1.7.0
+      '@scure/bip32': 1.1.1
+      '@scure/bip39': 1.1.0
+      '@suchipi/femver': 1.0.0
+      bs58: 5.0.0
+      cross-fetch: 3.1.5
+      jayson: 3.7.0
+      js-sha3: 0.8.0
+      lossless-json: 1.0.5
+      rpc-websockets: 7.5.0
+      tweetnacl: 1.0.3
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+    dev: false
+
   /@mysten/wallet-standard/0.2.3:
     resolution: {integrity: sha512-PbVKdgDnXJxGawvk0Bm7hRWFRyCz2YKHGPiqgZ6s+ABEeiW1w2Dw8mBdKP5MGlLe+C4CcEFZipagHJf9d3dFRg==}
     dependencies:
@@ -3553,10 +3576,16 @@ packages:
       resolve-from: 5.0.0
     dev: true
 
-  /@suiet/wallet-kit/0.1.10_rj7ozvcq3uehdlnj3cbwzbi5ce:
-    resolution: {integrity: sha512-tJZwy5wGwEyPOk8BkZ0reUhQmhJeAarGO4x7eC2XKKwUenULShdVKsAokjvl1q8vhgeFxIZwvM/7oGSUIxE0BQ==}
+  /@suchipi/femver/1.0.0:
+    resolution: {integrity: sha512-bprE8+K5V+DPX7q2e2K57ImqNBdfGHDIWaGI5xHxZoxbKOuQZn4wzPiUxOAHnsUr3w3xHrWXwN7gnG/iIuEMIg==}
+    dev: false
+
+  /@suiet/wallet-kit/0.1.11_rj7ozvcq3uehdlnj3cbwzbi5ce:
+    resolution: {integrity: sha512-ndp4XAjtX1rRmliJZ1C6pftNe69Xf6de+yRjmcA3gS9+9qdbrKua8o8gKpjBLKgXYMaB/lDjvs5Bst+6MudfCQ==}
+    peerDependencies:
+      cross-fetch: 3.x
     dependencies:
-      '@mysten/sui.js': 0.17.1
+      '@mysten/sui.js': 0.20.0
       '@mysten/wallet-standard': 0.2.3
       '@radix-ui/react-dialog': 1.0.2_rj7ozvcq3uehdlnj3cbwzbi5ce
       '@svgr/rollup': 6.5.1
@@ -3566,6 +3595,7 @@ packages:
       lodash-es: 4.17.21
       mitt: 3.0.0
       swr: 1.3.0_react@18.2.0
+      tweetnacl: 1.0.3
       type-fest: 3.3.0
     transitivePeerDependencies:
       - '@types/react'
@@ -5258,6 +5288,10 @@ packages:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
     dev: true
 
+  /base-x/4.0.0:
+    resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
+    dev: false
+
   /base/0.11.2:
     resolution: {integrity: sha512-5T6P4xPgpp0YDFvSWwEZ4NoE3aM4QBQXDzmVbraCkFj8zHM+mba8SyqB5DbZWyR7mYHo6Y7BdQo3MoA4m0TeQg==}
     engines: {node: '>=0.10.0'}
@@ -5476,6 +5510,12 @@ packages:
     dependencies:
       fast-json-stable-stringify: 2.1.0
     dev: true
+
+  /bs58/5.0.0:
+    resolution: {integrity: sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==}
+    dependencies:
+      base-x: 4.0.0
+    dev: false
 
   /bser/2.1.1:
     resolution: {integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==}
