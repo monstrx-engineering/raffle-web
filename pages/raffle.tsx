@@ -16,7 +16,7 @@ import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict, parseISO, isPast } from 'date-fns';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
@@ -45,7 +45,7 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 	});
 
 	let totalItems = whitelists?.count;
-	let totalPages = Math.floor(totalItems ?? 0 / itemsPerPage);
+	let totalPages = Math.floor((totalItems ?? 0) / itemsPerPage);
 
 	return (
 		<>
@@ -155,9 +155,20 @@ function RaffleDetail({ id }: { id: string }) {
 								size="lg"
 								color="cyan"
 								onClick={claimWhitelist}
-								disabled={!wallet.address || claimed}
+								disabled={!wallet.address || claimed || remaining < 1}
 							>
-								{claimed ? 'Claimed!' : 'Claim whitelist'}
+								{(() => {
+									switch (true) {
+										case parseISO(raffle?.end_tz || '') && isPast(parseISO(raffle?.end_tz || '')):
+											return 'Raffle ended';
+										case claimed:
+											return 'Claimed!';
+										case remaining < 1:
+											return 'Sold out';
+										default:
+											return 'Claim whitelist';
+									}
+								}).call()}
 							</Button>
 						)}
 					</Stack>
