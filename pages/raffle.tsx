@@ -11,6 +11,7 @@ import {
 	Stack,
 	Table,
 	Text,
+	Title,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
@@ -117,7 +118,7 @@ function RaffleDetail({ id }: { id: string }) {
 		},
 	});
 
-	const button = !wallet.connected ? (
+	const claimButton = !wallet.connected ? (
 		<SelectWalletButton size="lg" color="cyan">
 			Connect Wallet to Claim
 		</SelectWalletButton>
@@ -172,7 +173,12 @@ function RaffleDetail({ id }: { id: string }) {
 							<Text>{`${String(remaining).padStart(3, '0')}/${raffle?.ticket_max}`}</Text>
 						</Stack>
 
-						{button}
+						{claimButton}
+
+						<Stack spacing="xs" align="center">
+							<Input.Label>Winner</Input.Label>
+							<Text>{raffle?.winner || 'TBA'}</Text>
+						</Stack>
 					</Stack>
 				</Card>
 			</SimpleGrid>
