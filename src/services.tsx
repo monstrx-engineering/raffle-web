@@ -7,11 +7,17 @@ export type RafflesResponse = Awaited<ReturnType<typeof getRaffles>>;
 export type RafflesResponseSuccess = RafflesResponse['data'];
 export type RafflesResponseError = RafflesResponse['error'];
 
-export const getRaffle = (id: string) => getRaffles().match({ id }).single();
+export const getRaffle = (id: string) =>
+	getRaffles()
+		.match({ id })
+		.throwOnError()
+		.maybeSingle()
+		.then(({ data }) => {
+			const ticket_unsold = data?.ticket_max - data?.ticket_sold;
+			return { ...data, ticket_unsold };
+		});
 
 export type RaffleResponse = Awaited<ReturnType<typeof getRaffle>>;
-export type RaffleResponseSuccess = RaffleResponse['data'];
-export type RaffleResponseError = RaffleResponse['error'];
 
 export const isRegistered = (raffle_id: string, address: string) => {
 	return supabase
@@ -23,17 +29,7 @@ export const isRegistered = (raffle_id: string, address: string) => {
 		.then(({ count }) => Boolean(count));
 };
 
-export const getRemainingSlots = (raffle_id: string) => {
-	return supabase
-		.from('raffle')
-		.select('ticket_sold,ticket_max')
-		.match({ id: raffle_id })
-		.throwOnError()
-		.maybeSingle()
-		.then(({ data }) => {
-			return data?.ticket_max - data?.ticket_sold;
-		});
-};
+export type IsRegisteredResponse = Awaited<ReturnType<typeof isRegistered>>;
 
 export type Pagination = {
 	from: number;
@@ -61,10 +57,16 @@ export type WhitelistResponseError = WhitelistResponse['error'];
 
 export const queries = createQueryKeyStore({
 	raffles: {
-		all: null,
+		list: null,
 		detail: (id: string) => ({
 			queryKey: [id],
 			queryFn: () => getRaffle(id),
+			contextQueries: {
+				claimed: (address: string) => ({
+					queryKey: [address],
+					queryFn: () => isRegistered(id, address),
+				}),
+			},
 		}),
 	},
 	participants: {

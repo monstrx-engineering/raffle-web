@@ -14,9 +14,10 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
+import { PostgrestError } from '@supabase/supabase-js';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { formatDistanceToNowStrict, parseISO, isPast } from 'date-fns';
+import { formatDistanceToNowStrict, isPast, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
@@ -76,25 +77,25 @@ function RaffleDetail({ id }: { id: string }) {
 
 	let { data: raffle } = useQuery({
 		...queries.raffles.detail(id),
-		select: ({ data }) => data,
 	});
 
 	let { data: claimed } = useQuery({
-		queryKey: ['isRegistered', { id, address: wallet.address }],
-		queryFn: () => isRegistered(id, wallet.address),
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		...queries.raffles.detail(id)._ctx.claimed(wallet.address!),
 		enabled: !!wallet.address,
 	});
 
 	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
 	let { mutate: claimWhitelist } = useMutation({
-		mutationFn: async (e) => {
-			if (!(wallet.connected && wallet.address)) {
-				return Promise.reject();
-			}
-
-			return supabase.from('participant').insert({ raffle_id: id, address: wallet.address });
+		mutationFn: async () => {
+			if (!wallet.address) throw Error('no wallet connected');
+			return supabase
+				.from('participant')
+				.insert({ raffle_id: Number(id), address: wallet.address })
+				.throwOnError();
 		},
+
 		onSuccess: (data) => {
 			showNotification({
 				title: 'Success',
@@ -102,11 +103,11 @@ function RaffleDetail({ id }: { id: string }) {
 				color: 'green',
 				icon: <IconCheck />,
 			});
-
 			// TODO: refetch whitelist table
 			// TODO: refetch remaining tickets
 		},
-		onError: (error) => {
+
+		onError: (error: PostgrestError) => {
 			showNotification({
 				title: 'Error',
 				message: JSON.stringify(error),

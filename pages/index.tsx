@@ -8,7 +8,7 @@ export type chain = 'SUI' | 'APTOS';
 
 export default function RaffleListPage() {
 	const { data: raffles } = useQuery<unknown, RafflesResponseError, RafflesResponse>({
-		...queries.raffles.all,
+		...queries.raffles.list,
 		queryFn: getRaffles,
 	});
 

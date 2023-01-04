@@ -2,13 +2,14 @@ module.exports = {
 	root: true,
 	extends: [
 		'mantine',
-		'plugin:@typescript-eslint/recommended',
 		'plugin:@next/next/recommended',
 		'plugin:jest/recommended',
 		'plugin:storybook/recommended',
+		'plugin:@typescript-eslint/recommended',
+		"plugin:@typescript-eslint/recommended-requiring-type-checking",
 		'plugin:prettier/recommended',
 	],
-	plugins: ['testing-library', 'jest', '@typescript-eslint'],
+	plugins: ['testing-library', 'jest', '@typescript-eslint', 'import'],
 	overrides: [
 		{
 			files: ['**/?(*.)+(spec|test).[jt]s?(x)'],
@@ -17,22 +18,15 @@ module.exports = {
 	],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
-		ecmaFeatures: { jsx: true },
-		ecmaVersion: 'latest',
-		sourceType: 'module',
 		project: './tsconfig.json',
+		tsconfigRootDir: './',
 	},
 	settings: {
 		'import/resolver': {
 			typescript: {},
-			alias: {
-				extensions: ['.js', '.jsx', '.ts', '.tsx'],
-				map: [['~', '.']],
-			},
 		},
 	},
 	rules: {
-		'import/extensions': ['error', 'ignorePackages', { '': 'never' }],
 		'react/react-in-jsx-scope': 'off',
 	},
 };
