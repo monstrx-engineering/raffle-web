@@ -19,7 +19,7 @@ import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNowStrict, isPast, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
+import { MouseEvent, useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
 import supabase from '~/lib/supabase';
@@ -27,12 +27,11 @@ import {
 	WhitelistResponse,
 	WhitelistResponseError,
 	getWhitelistByRaffleId,
-	isRegistered,
 	queries,
 } from '~/src/services';
 
 let itemsPerPage = 5;
-const getPagination = (page) => ({
+const getPagination = (page: number) => ({
 	from: (page - 1) * itemsPerPage,
 	to: page * itemsPerPage,
 });
@@ -53,6 +52,7 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 			<Table maw={{ lg: 960, 560: 480 }} mt={40} mb="md">
 				<thead>
 					<tr>
+						<th>No.</th>
 						<th>Wallet</th>
 						<th>When</th>
 					</tr>
@@ -62,7 +62,7 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 						<tr key={address}>
 							<td>{(page - 1) * itemsPerPage + (i + 1)}</td>
 							<td>{address}</td>
-							<td>{formatDistanceToNowStrict(new Date(created_at))}</td>
+							<td>{created_at ? formatDistanceToNowStrict(new Date(created_at)) : '???'}</td>
 						</tr>
 					))}
 				</tbody>
@@ -88,7 +88,7 @@ function RaffleDetail({ id }: { id: string }) {
 	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
 	let { mutate: claimWhitelist } = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (_e: MouseEvent<HTMLButtonElement>) => {
 			if (!wallet.address) throw Error('no wallet connected');
 			return supabase
 				.from('participant')
@@ -96,7 +96,7 @@ function RaffleDetail({ id }: { id: string }) {
 				.throwOnError();
 		},
 
-		onSuccess: (data) => {
+		onSuccess: () => {
 			showNotification({
 				title: 'Success',
 				message: `Whitelist claimed!`,
@@ -117,8 +117,33 @@ function RaffleDetail({ id }: { id: string }) {
 		},
 	});
 
-	let router = useRouter();
+	const button = !wallet.connected ? (
+		<SelectWalletButton size="lg" color="cyan">
+			Connect Wallet to Claim
+		</SelectWalletButton>
+	) : (
+		<Button
+			size="lg"
+			color="cyan"
+			onClick={claimWhitelist}
+			disabled={!wallet.address || claimed || remaining < 1}
+		>
+			{(() => {
+				switch (true) {
+					case parseISO(raffle?.end_tz || '') && isPast(parseISO(raffle?.end_tz || '')):
+						return 'Raffle ended';
+					case claimed:
+						return 'Claimed!';
+					case remaining < 1:
+						return 'Sold out';
+					default:
+						return 'Claim whitelist';
+				}
+			}).call()}
+		</Button>
+	);
 
+	let router = useRouter();
 	return (
 		<Flex p={60} align="center" direction="column">
 			<Box maw={{ lg: 960, 560: 480 }} w="100%" pb="sm">
@@ -147,31 +172,7 @@ function RaffleDetail({ id }: { id: string }) {
 							<Text>{`${String(remaining).padStart(3, '0')}/${raffle?.ticket_max}`}</Text>
 						</Stack>
 
-						{!wallet.connected ? (
-							<SelectWalletButton size="lg" color="cyan">
-								Connect Wallet to Claim
-							</SelectWalletButton>
-						) : (
-							<Button
-								size="lg"
-								color="cyan"
-								onClick={claimWhitelist}
-								disabled={!wallet.address || claimed || remaining < 1}
-							>
-								{(() => {
-									switch (true) {
-										case parseISO(raffle?.end_tz || '') && isPast(parseISO(raffle?.end_tz || '')):
-											return 'Raffle ended';
-										case claimed:
-											return 'Claimed!';
-										case remaining < 1:
-											return 'Sold out';
-										default:
-											return 'Claim whitelist';
-									}
-								}).call()}
-							</Button>
-						)}
+						{button}
 					</Stack>
 				</Card>
 			</SimpleGrid>
