@@ -6,7 +6,7 @@ module.exports = {
 		'plugin:jest/recommended',
 		'plugin:storybook/recommended',
 		'plugin:@typescript-eslint/recommended',
-		"plugin:@typescript-eslint/recommended-requiring-type-checking",
+		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'plugin:prettier/recommended',
 	],
 	plugins: ['testing-library', 'jest', '@typescript-eslint', 'import'],
@@ -28,5 +28,6 @@ module.exports = {
 	},
 	rules: {
 		'react/react-in-jsx-scope': 'off',
+		'@typescript-eslint/no-unused-vars': [2, { argsIgnorePattern: '^_' }],
 	},
 };
