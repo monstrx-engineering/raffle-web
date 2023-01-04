@@ -16,7 +16,9 @@
 		"prettier:write": "prettier --write \"**/*.{ts,tsx}\"",
 		"test": "npm run prettier:check && npm run lint && npm run typecheck && npm run jest",
 		"storybook": "start-storybook -p 7001",
-		"storybook:build": "build-storybook"
+		"storybook:build": "build-storybook",
+		"gen": "pnpm gen:supabase-types",
+		"gen:supabase-types": "pnpx supabase gen types typescript --project-id lmxcedbadtekgdeasjfn > lib/supabase/db.types.ts"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
