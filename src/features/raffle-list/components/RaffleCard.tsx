@@ -37,9 +37,11 @@ export const RaffleCard = createPolymorphicComponent<'div', RaffleCardProps>(
 				<Card ref={ref} component="div" radius="lg" {...props}>
 					<Stack spacing="xs">
 						<Image radius="md" src={image} />
-						<Group position="apart">
-							<Title order={5}>{name}</Title>
-							<Badge color="blue.3" variant="filled">
+						<Group position="apart" spacing={0} noWrap>
+							<Title order={5} sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+								{name}
+							</Title>
+							<Badge color="blue.3" variant="filled" sx={{ flexShrink: 0 }}>
 								{chain}
 							</Badge>
 						</Group>
