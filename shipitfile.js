@@ -33,8 +33,8 @@ module.exports = (shipit) => {
 	shipit.on('updated', async () => {
 		shipit.start('install', 'copy-config', 'build');
 	});
-	
-  shipit.on('rollback', async () => {
+
+	shipit.on('rollback', async () => {
 		shipit.start('install', 'copy-config');
 	});
 
@@ -42,7 +42,7 @@ module.exports = (shipit) => {
 		shipit.start('start-server');
 	});
 
-	shipit.task('copy-config', async () => {
+	shipit.blTask('copy-config', async () => {
 		const fs = require('fs');
 		const ecosystem = `
 module.exports = {
@@ -73,15 +73,15 @@ module.exports = {
 		await shipit.copyToRemote('ecosystem.config.js', configFilePath);
 	});
 
-	shipit.task('install', async () => {
-		await shipit.remote(`cd ${shipit.releasePath} && pnpm install --production`);
+	shipit.blTask('install', async () => {
+		await shipit.remote(`cd ${shipit.releasePath} && pnpm i`);
 	});
 
-	shipit.task('build', async () => {
+	shipit.blTask('build', async () => {
 		await shipit.remote(`cd ${shipit.releasePath} && pnpm build`);
 	});
 
-	shipit.task('start-server', async () => {
+	shipit.blTask('start-server', async () => {
 		await shipit.remote(`pm2 delete -s ${appName} || :`);
 		await shipit.remote(`pm2 start ${configFilePath} --env production`);
 	});
