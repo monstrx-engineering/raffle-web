@@ -10,8 +10,7 @@ import {
 	SimpleGrid,
 	Stack,
 	Table,
-	Text,
-	Title,
+	Text
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
