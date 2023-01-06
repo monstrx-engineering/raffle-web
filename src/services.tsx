@@ -24,7 +24,6 @@ export const isRegistered = (raffle_id: string, address: string) => {
 		.from('participant')
 		.select('*', { count: 'exact', head: true })
 		.match({ raffle_id, address })
-		.throwOnError()
 		.maybeSingle()
 		.then(({ count }) => Boolean(count));
 };
@@ -73,6 +72,6 @@ export const queries = createQueryKeyStore({
 		byRaffleId: (raffleId: string) => [raffleId],
 	},
 	whitelists: {
-		byRaffleId: (raffleId: string) => [raffleId],
+		byRaffleId: (raffleId: string, page) => [raffleId, page],
 	},
 });
