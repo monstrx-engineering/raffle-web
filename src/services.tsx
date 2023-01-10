@@ -1,14 +1,17 @@
 import { createQueryKeyStore } from '@lukemorales/query-key-factory';
 import supabase from '~/lib/supabase';
 
-export const getRaffles = () => supabase.from('raffle').select().throwOnError();
+export const getRaffles = () =>
+	supabase.from('raffle').select().order('created_at', { ascending: false }).throwOnError();
 
 export type RafflesResponse = Awaited<ReturnType<typeof getRaffles>>;
 export type RafflesResponseSuccess = RafflesResponse['data'];
 export type RafflesResponseError = RafflesResponse['error'];
 
 export const getRaffle = (id: string) =>
-	getRaffles()
+	supabase
+		.from('raffle')
+		.select()
 		.match({ id })
 		.throwOnError()
 		.maybeSingle()
