@@ -8,7 +8,7 @@ export function Layout({ children }: { children: ReactNode }) {
 		<AppShell
 			styles={{
 				main: {
-					backgroundImage: 'url("/bg1.jpg")',
+					backgroundImage: 'url("/bg.jpg")',
 					backgroundSize: 'cover',
 					backgroundPositionX: '87%',
 				},
