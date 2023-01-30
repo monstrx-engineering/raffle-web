@@ -3,7 +3,6 @@ import {
 	Box,
 	Button,
 	Card,
-	Code,
 	Flex,
 	Image,
 	Input,
@@ -99,6 +98,12 @@ function RaffleDetail({ id }: { id: string }) {
 		...queries.raffles.detail(id),
 	});
 
+	let raffleHasEnded = useMemo(() => {
+		let deadline = parseISO(raffle?.end_tz || '') as unknown as number;
+		if (Number.isNaN(deadline)) return false;
+		return isPast(deadline);
+	}, [raffle]);
+
 	let { data: claimed } = useQuery({
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		...queries.raffles.detail(id)._ctx.claimed(wallet.address!),
@@ -150,7 +155,7 @@ function RaffleDetail({ id }: { id: string }) {
 		>
 			{(() => {
 				switch (true) {
-					case parseISO(raffle?.end_tz || '') && isPast(parseISO(raffle?.end_tz || '')):
+					case raffleHasEnded:
 						return 'Raffle ended';
 					case claimed:
 						return 'Claimed!';
@@ -202,7 +207,7 @@ function RaffleDetail({ id }: { id: string }) {
 				</Card>
 			</SimpleGrid>
 
-			<WhitelistTable raffleId={id} />
+			{!raffleHasEnded && <WhitelistTable raffleId={id} />}
 		</Flex>
 	);
 }
