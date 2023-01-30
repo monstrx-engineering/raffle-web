@@ -3,6 +3,7 @@ import {
 	Box,
 	Button,
 	Card,
+	Divider,
 	Flex,
 	Image,
 	Input,
@@ -11,6 +12,7 @@ import {
 	Stack,
 	Table,
 	Text,
+	Title,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
@@ -88,6 +90,29 @@ function WhitelistTable({ raffleId }: { raffleId: string }) {
 			</Card>
 			<Pagination total={totalPages} onChange={setPage} />
 		</>
+	);
+}
+
+function WinnerTable({ winners }: { winners: string[] }) {
+	return (
+		<Card>
+			<Table>
+				<thead>
+					<tr>
+						<th>No.</th>
+						<th style={{ textAlign: 'right' }}>Discord</th>
+					</tr>
+				</thead>
+				<tbody>
+					{winners.map((account, i) => (
+						<tr key={account}>
+							<td>{i + 1}</td>
+							<td style={{ textAlign: 'right' }}>{account}</td>
+						</tr>
+					))}
+				</tbody>
+			</Table>
+		</Card>
 	);
 }
 
@@ -199,10 +224,15 @@ function RaffleDetail({ id }: { id: string }) {
 
 						{claimButton}
 
-						<Stack spacing="xs" align="center">
-							<Input.Label>Winner</Input.Label>
-							<Text>{raffle?.winner || 'TBA'}</Text>
-						</Stack>
+						{raffleHasEnded && (
+							<Stack spacing={0}>
+								<Divider my="lg" />
+								<Title order={4} align="center">
+									Winner
+								</Title>
+								<WinnerTable winners={raffle?.winner?.split(/\s+/) || []} />
+							</Stack>
+						)}
 					</Stack>
 				</Card>
 			</SimpleGrid>
