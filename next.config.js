@@ -10,18 +10,3 @@ module.exports = withBundleAnalyzer({
 	typescript: {
 		ignoreBuildErrors: true,
 	},
-	webpack: (config) => {
-		config.module.rules.push({
-			test: /\.worker\.(js|ts)$/i,
-			use: [
-				{
-					loader: 'comlink-loader',
-					options: {
-						singleton: true,
-					},
-				},
-			],
-		});
-		return config;
-	},
-});
