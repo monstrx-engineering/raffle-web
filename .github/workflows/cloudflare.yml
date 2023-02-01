@@ -18,19 +18,32 @@ jobs:
       deployments: write
       pull-requests: write
     steps:
+      # preparation
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: pnpm/action-setup@v2
+        id: pnpm-install
         with:
           version: 7
           run_install: false
-      - name: Setup Node
-        id: setup-node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
 
+      # cache node_modules
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - run: pnpm install --frozen-lockfile
+      # build & publish
       - run: pnpm export
       - name: Publish to Cloudflare Pages
         if: ${{ !env.ACT }}
@@ -38,7 +51,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: $PAGES_PROJECT_NAME
+          projectName: ${{ env.PAGES_PROJECT_NAME }}
           directory: ./out
           # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
