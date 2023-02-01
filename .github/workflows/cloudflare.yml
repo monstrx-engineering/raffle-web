@@ -1,6 +1,9 @@
 on:
   - push
   - pull_request
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 env:
   PAGES_PROJECT_NAME: raffle-web
