@@ -43,15 +43,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm export
 
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: YOUR_ACCOUNT_ID
-          projectName: YOUR_PROJECT_NAME
-          directory: ./
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: $PAGES_PROJECT_NAME
+          directory: ./out
           # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
