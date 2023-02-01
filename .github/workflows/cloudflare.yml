@@ -27,9 +27,9 @@ jobs:
         id: setup-node
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
-          cache: "pnpm"
-      - run: pnpm install
+          node-version: 18
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
 
       - run: pnpm export
       - name: Publish to Cloudflare Pages
