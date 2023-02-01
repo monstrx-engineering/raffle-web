@@ -29,7 +29,7 @@ export default function App(props: AppProps) {
 
 	const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
 
-	const preferredColorScheme = useColorScheme('dark', { getInitialValueInEffect: false });
+	const preferredColorScheme = useColorScheme('dark');
 	const [colorScheme, setColorScheme] = useState<ColorScheme>(
 		props.colorScheme ?? preferredColorScheme
 	);
@@ -62,11 +62,3 @@ export default function App(props: AppProps) {
 		</>
 	);
 }
-
-App.getInitialProps = async (appContext: AppContext) => {
-	const appProps = await NextApp.getInitialProps(appContext);
-	return {
-		...appProps,
-		colorScheme: getCookie('mantine-color-scheme', appContext.ctx),
-	};
-};
