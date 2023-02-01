@@ -10,3 +10,4 @@ module.exports = withBundleAnalyzer({
 	typescript: {
 		ignoreBuildErrors: true,
 	},
+});
