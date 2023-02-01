@@ -10,7 +10,6 @@ env:
 
 jobs:
   publish:
-    name: Publish to Cloudflare Pages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,8 +25,8 @@ jobs:
         id: setup-node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
       - run: pnpm install
       
       - run: pnpm export
