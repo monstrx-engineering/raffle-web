@@ -28,9 +28,10 @@ jobs:
           node-version: "18"
           cache: "pnpm"
       - run: pnpm install
-      
+
       - run: pnpm export
       - name: Publish to Cloudflare Pages
+        if: ${{ !env.ACT }}
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
