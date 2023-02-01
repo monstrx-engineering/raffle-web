@@ -8,9 +8,11 @@ export function Layout({ children }: { children: ReactNode }) {
 		<AppShell
 			styles={{
 				main: {
-					backgroundImage: 'url("/bg.jpg")',
 					backgroundSize: 'cover',
 					backgroundPositionX: '87%',
+
+					'html.avif &': { backgroundImage: `url('/bg.avif')` },
+					'html.fallback &': { backgroundImage: `url('/bg.jpg')` },
 				},
 			}}
 			header={<DefaultHeader />}
