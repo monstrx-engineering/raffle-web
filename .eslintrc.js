@@ -29,6 +29,7 @@ module.exports = {
 	rules: {
 		'react/react-in-jsx-scope': 'off',
 		'@typescript-eslint/no-unused-vars': [2, { argsIgnorePattern: '^_' }],
-		'@typescript-eslint/no-non-null-assertion': 0,
+		'@typescript-eslint/no-non-null-assertion': 'off',
+		'prefer-const': 'off',
 	},
 };
