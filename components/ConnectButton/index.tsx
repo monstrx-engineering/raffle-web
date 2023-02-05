@@ -29,12 +29,9 @@ export function SelectWalletButton(props: ButtonProps) {
 
 	return (
 		<ConnectModal open={showModal} onOpenChange={(open: boolean) => setShowModal(open)}>
-			<Button
-				// eslint-disable-next-line react/no-children-prop
-				children="Connect Wallet"
-				{...props}
-				onClick={() => setShowModal(true)}
-			/>
+			<Button {...props} onClick={() => setShowModal(true)}>
+				Connect Wallet
+			</Button>
 		</ConnectModal>
 	);
 }
