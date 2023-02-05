@@ -193,13 +193,14 @@ function RaffleDetail({ id }: { id: string }) {
 		</Button>
 	);
 
-	let router = useRouter();
 	return (
 		<Flex p={60} align="center" direction="column">
 			<Box maw={{ lg: 960, 560: 480 }} w="100%" pb="sm">
-				<Button variant="subtle" leftIcon={<IconArrowBack size={16} />} onClick={router.back}>
+				<Link href="/">
+					<Button variant="subtle" leftIcon={<IconArrowBack size={16} />}>
 					return
 				</Button>
+				</Link>
 			</Box>
 
 			<SimpleGrid
