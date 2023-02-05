@@ -1,12 +1,16 @@
 /* eslint-disable prefer-const */
 import {
+	ActionIcon,
 	Box,
 	Button,
 	Card,
+	createStyles,
 	Divider,
 	Flex,
+	Group,
 	Image,
 	Input,
+	Menu,
 	Pagination,
 	SimpleGrid,
 	Stack,
@@ -14,24 +18,74 @@ import {
 	Text,
 	Title,
 } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
+import { showNotification, updateNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
 import { PostgrestError } from '@supabase/supabase-js';
-import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
+import {
+	IconArrowBack,
+	IconBrandDiscord,
+	IconCheck,
+	IconChevronDown,
+	IconLogout,
+	IconSwitchHorizontal,
+	IconX,
+} from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNowStrict, isPast, parseISO } from 'date-fns';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { MouseEvent, useMemo, useState } from 'react';
+import React, { MouseEvent, useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
+import { fetchImplicitAccessToken, ImplicitGrantDone } from '~/lib/discord/implicitGrant';
 import supabase from '~/lib/supabase';
 import {
-	WhitelistResponse,
-	WhitelistResponseError,
 	getWhitelistByRaffleId,
 	queries,
+	WhitelistResponse,
+	WhitelistResponseError,
 } from '~/src/services';
+import { useLocalStorage } from '@mantine/hooks';
+import * as DiscordProfile from '~/lib/discord/profile';
+
+const useStyles = createStyles((theme) => ({
+	button: {
+		borderTopRightRadius: 0,
+		borderBottomRightRadius: 0,
+	},
+
+	menuControl: {
+		borderTopLeftRadius: 0,
+		borderBottomLeftRadius: 0,
+		border: 0,
+		borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white}`,
+	},
+}));
+
+function SplitButton({ button: Button, children: dropdown }) {
+	const { classes, theme } = useStyles();
+	// const menuIconColor = theme.colors[theme.primaryColor][theme.colorScheme === 'dark' ? 5 : 6];
+
+	return (
+		<Group noWrap spacing={0}>
+			{React.cloneElement(Button, { className: classes.button })}
+			<Menu transition="pop" position="bottom-end">
+				<Menu.Target>
+					<ActionIcon
+						variant="filled"
+						color={Button.props.color || theme.primaryColor}
+						size={36}
+						className={classes.menuControl}
+						h={50}
+					>
+						<IconChevronDown size={16} stroke={1.5} />
+					</ActionIcon>
+				</Menu.Target>
+				{dropdown}
+			</Menu>
+		</Group>
+	);
+}
 
 let itemsPerPage = 8;
 const getPagination = (page: number) => ({
@@ -116,6 +170,107 @@ function WinnerTable({ winners }: { winners: string[] }) {
 	);
 }
 
+function ConnectDiscordButton() {
+	let [credentials, setCredentials, clearCredentials] = useLocalStorage<ImplicitGrantDone | null>({
+		key: 'discord-credentials',
+		defaultValue: null,
+	});
+
+	let login = useMutation({
+		mutationFn: fetchImplicitAccessToken,
+		retry: false,
+
+		onMutate() {
+			showNotification({
+				id: 'discord-auth',
+				title: 'Awaiting approval',
+				message: 'Need your explicit authorization to access to your Discord identity.',
+				loading: true,
+				autoClose: false,
+				disallowClose: true,
+			});
+		},
+
+		onSuccess(data) {
+			setCredentials(data);
+		},
+
+		onError(error: Error) {
+			updateNotification({
+				id: 'discord-auth',
+				title: 'Failure',
+				message: error.message,
+				color: 'red',
+				icon: <IconX />,
+				autoClose: 5000,
+			});
+		},
+	});
+
+	let profile = useQuery<Discord.Token>({
+		queryKey: ['discord', 'profile', login.data],
+		queryFn: async () => {
+			let { token_type, access_token } = login.data!;
+			return DiscordProfile.get(access_token);
+		},
+		enabled: !!login.data?.access_token,
+		retry: false,
+
+		onSuccess(data) {
+			let { user } = data;
+			updateNotification({
+				id: 'discord-auth',
+				title: 'Success',
+				message: `Welcome ${user.username}#${user.discriminator}`,
+				color: 'green',
+				icon: <IconCheck />,
+				autoClose: 5000,
+			});
+		},
+	});
+
+	let logout = () => {
+		setCredentials(null);
+		login.reset();
+		profile.remove();
+	};
+
+	if (profile.isSuccess) {
+		let { user } = profile.data;
+
+		let avatar = (
+			<Image radius="lg" width={32} src={DiscordProfile.getAvatarURL(user.id, user.avatar)} />
+		);
+
+		return (
+			<SplitButton
+				button={
+					<Button fullWidth size="lg" leftIcon={avatar} color={'indigo.7'}>
+						{`${user.username}#${user.discriminator}`}
+					</Button>
+				}
+			>
+				<Menu.Dropdown>
+					<Menu.Item onClick={logout} icon={<IconSwitchHorizontal size={16} stroke={1.5} />}>
+						Change Account
+					</Menu.Item>
+				</Menu.Dropdown>
+			</SplitButton>
+		);
+	}
+
+	return (
+		<Button
+			size="lg"
+			loading={login.isLoading}
+			leftIcon={<IconBrandDiscord />}
+			onClick={() => login.mutate('')}
+		>
+			Connect Discord
+		</Button>
+	);
+}
+
 function RaffleDetail({ id }: { id: string }) {
 	let wallet = useWallet();
 
@@ -135,6 +290,8 @@ function RaffleDetail({ id }: { id: string }) {
 		enabled: !!wallet.address,
 	});
 
+	// @ts-expect-error TODO
+	// eslint-disable-next-line no-unsafe-optional-chaining
 	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
 	let { mutate: claimWhitelist } = useMutation({
@@ -168,13 +325,14 @@ function RaffleDetail({ id }: { id: string }) {
 	});
 
 	const claimButton = !wallet.connected ? (
-		<SelectWalletButton size="lg" color="cyan">
+		<SelectWalletButton size="lg" color="cyan" fullWidth>
 			Connect Wallet to Claim
 		</SelectWalletButton>
 	) : (
 		<Button
 			size="lg"
 			color="cyan"
+			fullWidth
 			onClick={claimWhitelist}
 			disabled={!wallet.address || claimed || remaining < 1}
 		>
@@ -195,13 +353,12 @@ function RaffleDetail({ id }: { id: string }) {
 
 	let router = useRouter();
 	return (
-		<Flex p={60} align="center" direction="column">
+		<Flex p={{ sm: 60 }} align="center" direction="column">
 			<Box maw={{ lg: 960, 560: 480 }} w="100%" pb="sm">
 				<Button variant="subtle" leftIcon={<IconArrowBack size={16} />} onClick={router.back}>
 					return
 				</Button>
 			</Box>
-
 			<SimpleGrid
 				maw={{ lg: 960, 560: 480 }}
 				cols={2}
@@ -216,13 +373,15 @@ function RaffleDetail({ id }: { id: string }) {
 							<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
 							{raffle?.end_tz && <Countdown date={raffle?.end_tz} />}
 						</Stack>
-
 						<Stack spacing="xs" align="center">
 							<Input.Label>Tickets Remaining</Input.Label>
 							<Text>{`${String(remaining).padStart(3, '0')}/${raffle?.ticket_max}`}</Text>
 						</Stack>
 
-						{claimButton}
+						<Stack px="md">
+							<ConnectDiscordButton />
+							{claimButton}
+						</Stack>
 
 						{raffleHasEnded && (
 							<Stack spacing={0}>
@@ -236,7 +395,6 @@ function RaffleDetail({ id }: { id: string }) {
 					</Stack>
 				</Card>
 			</SimpleGrid>
-
 			{!raffleHasEnded && <WhitelistTable raffleId={id} />}
 		</Flex>
 	);
