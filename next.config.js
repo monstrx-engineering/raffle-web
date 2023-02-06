@@ -6,11 +6,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 // prettier-ignore
 const PROXY_API_REQS_TO_CLOUDFLARE = {
-	source: 		 '/api/:rest*',
-	destination: '/api/:rest*',
+  source: "/api/:rest*",
+  destination: "/api/:rest*"
 };
 
-/** @returns {import('next').NextConfig} */
+/** @returns {import("next").NextConfig} */
 const config = (phase) => ({
 	reactStrictMode: false,
 	eslint: {
@@ -21,7 +21,7 @@ const config = (phase) => ({
 	},
 	swcMinify: true,
 	async rewrites() {
-		return [phase === PHASE_DEVELOPMENT_SERVER && PROXY_API_REQS_TO_CLOUDFLARE];
+		return phase === PHASE_DEVELOPMENT_SERVER ? [PROXY_API_REQS_TO_CLOUDFLARE] : [];
 	},
 });
 
