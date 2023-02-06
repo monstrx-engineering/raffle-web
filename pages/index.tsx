@@ -35,13 +35,9 @@ export default function RaffleListPage() {
 						remaining = raffle.ticket_max! - raffle.ticket_sold!;
 					}
 
+					const href = `/raffle?id=${raffle.id}`;
 					return (
-						<Link
-							href={{
-								pathname: '/raffle',
-								query: { id: raffle.id },
-							}}
-						>
+						<Link key={href} href={href}>
 							<RaffleCard
 								name={raffle.name || ''}
 								chain={raffle.chain || ''}
