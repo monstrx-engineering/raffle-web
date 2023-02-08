@@ -21,7 +21,7 @@ const TABLE_PLACEHOLDER = Array(ITEMS_PER_PAGE).fill({
 }) as NonNullable<WhitelistResponse['data']>;
 
 export function WhitelistTable({ raffleId }: { raffleId: string }) {
-  console.log('rendered')
+	console.log('rendered');
 
 	let [page, setPage] = useState(1);
 
