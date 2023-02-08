@@ -225,7 +225,7 @@ function RaffleDetail({ id }: { id: string }) {
 
 						{claimButton}
 
-						{raffleHasEnded && (
+						{!!raffle?.winner && (
 							<Stack spacing={0}>
 								<Divider my="lg" />
 								<Title order={4} align="center">
