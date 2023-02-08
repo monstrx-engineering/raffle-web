@@ -2,21 +2,26 @@ import { createClient, SupabaseClientOptions } from '@supabase/supabase-js';
 import { getCookie } from 'cookies-next';
 import type { Database } from './db.types';
 
+const customFetch: typeof fetch = (input, options) => {
+	let headers: Record<string, string> = {};
+
+	let jwt = getCookie('monstrx-token');
+	if (jwt) {
+		headers['Authorization'] = `Bearer ${jwt}`;
+	}
+
+	return fetch(input, {
+		...options,
+		headers: {
+			...options?.headers,
+			...headers,
+		},
+	});
+};
+
 const OPTIONS: SupabaseClientOptions<'public'> = {
 	global: {
-		fetch: (input, init) => {
-			let jwt = getCookie('monstrx-token');
-
-			let headers = init?.headers;
-			if (jwt) {
-				headers['authorization'] = `Bearer ${jwt}`;
-			}
-
-			return fetch(input, {
-				...init,
-				headers,
-			});
-		},
+		fetch: customFetch,
 	},
 };
 

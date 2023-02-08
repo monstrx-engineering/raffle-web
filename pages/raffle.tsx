@@ -280,7 +280,6 @@ function RaffleDetail({ raffleId }: { raffleId: string }) {
 									Claim whitelist
 								</Button>
 							)}
-							<pre>{JSON.stringify(getCookie('monstrx-token'))}</pre>
 						</Stack>
 
 						{deadlinePassed && raffle?.winner && (
