@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev": "wrangler pages dev --proxy 3000 --compatibility-date=2023-02-09 -- pnpm dev:next",
+		"dev:next": "next dev",
 		"build": "next build",
 		"analyze": "ANALYZE=true next build",
 		"start": "next start",
