@@ -2,6 +2,8 @@ import { createGetInitialProps } from '@mantine/next';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
 import Script from 'next/script';
 
+import script from '!raw-loader!../public/detect-img-support.js';
+
 const getInitialProps = createGetInitialProps();
 
 export default class _Document extends Document {
@@ -12,9 +14,11 @@ export default class _Document extends Document {
 			<Html>
 				<Head>
 					<Script
+						id="detect-img-support"
 						strategy="beforeInteractive"
-						type="text/javascript"
-						src="/detect-img-support.js"
+						dangerouslySetInnerHTML={{
+							__html: script,
+						}}
 					/>
 				</Head>
 
