@@ -123,21 +123,13 @@ function WinnerTable({ winners }: { winners: string[] }) {
 export type RaffleDetailProps = { data: RaffleResponse };
 export type RaffleDetailPageProps = { id: string | string[] | undefined };
 
-const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
-	let wallet = useWallet();
-
-	// @ts-ignore
-	let raffleDeadline = new Date(raffle?.end_tz).toJSON();
-	let raffleHasEnded = !!raffleDeadline && raffleDeadline < new Date().toJSON();
-
-	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
-
-	let { mutate: claimWhitelist } = useMutation({
-		mutationFn: async (_e: MouseEvent<HTMLButtonElement>) => {
-			if (!wallet.address) throw Error('no wallet connected');
+function useClaimWhitelist(raffleId: string) {
+	return useMutation({
+		mutationFn: async (address: string) => {
+			if (!address) throw Error('no wallet connected');
 			return supabase
 				.from('participant')
-				.insert({ raffle_id: Number(id), address: wallet.address })
+				.insert({ raffle_id: Number(raffleId), address })
 				.throwOnError();
 		},
 
@@ -148,19 +140,29 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 				color: 'green',
 				icon: <IconCheck />,
 			});
-			// TODO: refetch whitelist table
-			// TODO: refetch remaining tickets
 		},
 
 		onError: (error: PostgrestError) => {
 			showNotification({
 				title: 'Error',
-				message: JSON.stringify(error),
+				message: error.message,
 				color: 'red',
 				icon: <IconX />,
 			});
 		},
 	});
+}
+
+const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
+	let wallet = useWallet();
+
+	// @ts-ignore
+	let raffleDeadline = new Date(raffle?.end_tz).toJSON();
+	let raffleHasEnded = !!raffleDeadline && raffleDeadline < new Date().toJSON();
+
+	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
+
+	let { mutate: claimWhitelist } = useClaimWhitelist(raffle.id);
 
 	const claimButton = !wallet.connected ? (
 		<SelectWalletButton size="lg" color="cyan">
@@ -207,10 +209,10 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 				<Card radius="lg" p="lg">
 					<Stack py={{ lg: 20, 560: 0 }} justify="space-between">
 						{raffle?.end_tz && (
-						<Stack spacing="xs">
-							<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
+							<Stack spacing="xs">
+								<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
 								<Countdown date={raffle?.end_tz} />
-						</Stack>
+							</Stack>
 						)}
 
 						<Stack spacing="xs" align="center">
