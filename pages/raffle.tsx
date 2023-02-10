@@ -133,7 +133,9 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 
 				<Card radius="lg" p="lg">
 					<Stack pb={{ lg: 20, 560: 0 }} justify="space-between">
-						<Title order={2}>{raffle.name}</Title>
+						<Title order={2} align="center">
+							{raffle.name}
+						</Title>
 
 						{raffle.end_tz && (
 							<Stack spacing="xs">
