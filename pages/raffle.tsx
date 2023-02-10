@@ -72,11 +72,22 @@ function useClaimWhitelist(raffle_id: number) {
 		},
 
 		onError: (error: PostgrestError) => {
-			showNotification({
+			let message: string;
+
+			switch (error.code) {
+				case '23505':
+					message = `Already claimed!`;
+					break;
+				default:
+					message = error.message;
+					break;
+			}
+
+			return showNotification({
 				title: 'Error',
-				message: error.message,
 				color: 'red',
 				icon: <IconX />,
+				message,
 			});
 		},
 	});
