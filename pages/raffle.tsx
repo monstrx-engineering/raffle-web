@@ -123,11 +123,12 @@ function RaffleDetail({ id }: { id: string }) {
 		...queries.raffles.detail(id),
 	});
 
-	let raffleHasEnded = useMemo(() => {
-		let deadline = parseISO(raffle?.end_tz || '') as unknown as number;
-		if (Number.isNaN(deadline)) return false;
-		return isPast(deadline);
-	}, [raffle]);
+	// @ts-ignore
+	let raffleDeadline = new Date(raffle?.end_tz).toJSON();
+	let raffleHasEnded = useMemo(
+		() => !!raffleDeadline && raffleDeadline < new Date().toJSON(),
+		[raffleDeadline]
+	);
 
 	let { data: claimed } = useQuery({
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -176,7 +177,7 @@ function RaffleDetail({ id }: { id: string }) {
 			size="lg"
 			color="cyan"
 			onClick={claimWhitelist}
-			disabled={!wallet.address || claimed || remaining < 1}
+			disabled={!wallet.address || claimed || remaining < 1 || raffleHasEnded}
 		>
 			{(() => {
 				switch (true) {
@@ -198,8 +199,8 @@ function RaffleDetail({ id }: { id: string }) {
 			<Box maw={{ lg: 960, 560: 480 }} w="100%" pb="sm">
 				<Link href="/">
 					<Button variant="subtle" leftIcon={<IconArrowBack size={16} />}>
-					return
-				</Button>
+						return
+					</Button>
 				</Link>
 			</Box>
 
