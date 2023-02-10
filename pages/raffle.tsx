@@ -20,17 +20,21 @@ import { PostgrestError } from '@supabase/supabase-js';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { formatDistanceToNowStrict, isPast, parseISO } from 'date-fns';
+import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { MouseEvent, useMemo, useState } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
 import supabase from '~/lib/supabase';
+import { Database } from '~/lib/supabase/db.types';
 import {
 	WhitelistResponse,
 	WhitelistResponseError,
 	getWhitelistByRaffleId,
 	queries,
+	getRaffle,
+	RaffleResponse,
 } from '~/src/services';
 
 let itemsPerPage = 8;
@@ -116,25 +120,15 @@ function WinnerTable({ winners }: { winners: string[] }) {
 	);
 }
 
-function RaffleDetail({ id }: { id: string }) {
-	let wallet = useWallet();
+export type RaffleDetailProps = { data: RaffleResponse };
+export type RaffleDetailPageProps = { id: string | string[] | undefined };
 
-	let { data: raffle } = useQuery({
-		...queries.raffles.detail(id),
-	});
+const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
+	let wallet = useWallet();
 
 	// @ts-ignore
 	let raffleDeadline = new Date(raffle?.end_tz).toJSON();
-	let raffleHasEnded = useMemo(
-		() => !!raffleDeadline && raffleDeadline < new Date().toJSON(),
-		[raffleDeadline]
-	);
-
-	let { data: claimed } = useQuery({
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		...queries.raffles.detail(id)._ctx.claimed(wallet.address!),
-		enabled: !!wallet.address,
-	});
+	let raffleHasEnded = !!raffleDeadline && raffleDeadline < new Date().toJSON();
 
 	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
 
@@ -177,14 +171,12 @@ function RaffleDetail({ id }: { id: string }) {
 			size="lg"
 			color="cyan"
 			onClick={claimWhitelist}
-			disabled={!wallet.address || claimed || remaining < 1 || raffleHasEnded}
+			disabled={!wallet.address || remaining < 1 || raffleHasEnded}
 		>
 			{(() => {
 				switch (true) {
 					case raffleHasEnded:
 						return 'Raffle ended';
-					case claimed:
-						return 'Claimed!';
 					case remaining < 1:
 						return 'Sold out';
 					default:
@@ -239,14 +231,22 @@ function RaffleDetail({ id }: { id: string }) {
 				</Card>
 			</SimpleGrid>
 
-			{!raffleHasEnded && <WhitelistTable raffleId={id} />}
+			{raffle && !raffleHasEnded && <WhitelistTable raffleId={id} />}
 		</Flex>
 	);
-}
+};
 
-export default function RaffleDetailPage() {
-	const router = useRouter();
-	const { id } = router.query;
+const RaffleDetailPage: NextPage<RaffleDetailPageProps> = (props) => {
+	let router = useRouter();
 
-	return typeof id === 'string' && id && <RaffleDetail id={id} />;
-}
+	let param = props.id || router.query.id;
+	let id = Array.isArray(param) ? param[0] : param;
+
+	let { data, isSuccess } = useQuery({ ...queries.raffles.detail(id!), enabled: !!id });
+
+	return isSuccess ? <RaffleDetail data={data} /> : null;
+};
+
+RaffleDetailPage.getInitialProps = ({ query }) => ({ id: query.id });
+
+export default RaffleDetailPage;

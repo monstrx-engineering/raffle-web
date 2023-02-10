@@ -63,10 +63,12 @@ export const queries = createQueryKeyStore({
 		detail: (id: string) => ({
 			queryKey: [id],
 			queryFn: () => getRaffle(id),
+			enabled: Boolean(id),
 			contextQueries: {
 				claimed: (address: string) => ({
 					queryKey: [address],
 					queryFn: () => isRegistered(id, address),
+					enabled: Boolean(id && address),
 				}),
 			},
 		}),
