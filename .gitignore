@@ -37,3 +37,4 @@ yarn-error.log*
 # storybook
 storybook-static
 .idea
+.dev.vars
