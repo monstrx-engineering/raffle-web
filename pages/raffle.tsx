@@ -55,14 +55,11 @@ function StringTable({ data }: { data: string[] }) {
 export type RaffleDetailProps = { data: RaffleResponse };
 export type RaffleDetailPageProps = { id: string | string[] | undefined };
 
-function useClaimWhitelist(raffleId: string) {
+function useClaimWhitelist(raffle_id: number) {
 	return useMutation({
 		mutationFn: async (address: string) => {
 			if (!address) throw Error('no wallet connected');
-			return supabase
-				.from('participant')
-				.insert({ raffle_id: Number(raffleId), address })
-				.throwOnError();
+			return supabase.from('participant').insert({ raffle_id, address }).throwOnError();
 		},
 
 		onSuccess: () => {
@@ -89,12 +86,12 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 	let wallet = useWallet();
 
 	// @ts-ignore
-	let raffleDeadline = new Date(raffle?.end_tz).toJSON();
+	let raffleDeadline = new Date(raffle.end_tz).toJSON();
 	let raffleHasEnded = !!raffleDeadline && raffleDeadline < new Date().toJSON();
 
-	let remaining = useMemo(() => raffle?.ticket_max - raffle?.ticket_sold, [raffle]);
+	let remaining = useMemo(() => raffle.ticket_max - raffle.ticket_sold, [raffle]);
 
-	let { mutate: claimWhitelist } = useClaimWhitelist(raffle.id);
+	let { mutate: claim } = useClaimWhitelist(raffle.id!);
 
 	const claimButton = !wallet.connected ? (
 		<SelectWalletButton size="lg" color="cyan">
@@ -104,7 +101,7 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 		<Button
 			size="lg"
 			color="cyan"
-			onClick={claimWhitelist}
+			onClick={() => claim(wallet.address!)}
 			disabled={!wallet.address || remaining < 1 || raffleHasEnded}
 		>
 			{(() => {
@@ -136,25 +133,27 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 				spacing={50}
 				breakpoints={[{ maxWidth: 'lg', cols: 1 }]}
 			>
-				<Image radius="lg" src={raffle?.image} />
+				<Image radius="lg" src={raffle.image} />
 
 				<Card radius="lg" p="lg">
-					<Stack py={{ lg: 20, 560: 0 }} justify="space-between">
-						{raffle?.end_tz && (
+					<Stack pb={{ lg: 20, 560: 0 }} justify="space-between">
+						<Title order={2}>{raffle.name}</Title>
+
+						{raffle.end_tz && (
 							<Stack spacing="xs">
 								<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
-								<Countdown date={raffle?.end_tz} />
+								<Countdown date={raffle.end_tz} />
 							</Stack>
 						)}
 
 						<Stack spacing="xs" align="center">
 							<Input.Label>Tickets Remaining</Input.Label>
-							<Text>{`${String(remaining).padStart(3, '0')}/${raffle?.ticket_max}`}</Text>
+							<Text>{`${String(remaining).padStart(3, '0')}/${raffle.ticket_max}`}</Text>
 						</Stack>
 
 						{claimButton}
 
-						{!!raffle?.winner && raffle.winner !== 'TBA' && (
+						{!!raffle.winner && raffle.winner !== 'TBA' && (
 							<Stack spacing={0}>
 								<Divider my="lg" />
 								<Title order={4} align="center">
