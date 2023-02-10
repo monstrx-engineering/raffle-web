@@ -7,7 +7,6 @@ import {
 	Flex,
 	Image,
 	Input,
-	Pagination,
 	SimpleGrid,
 	Stack,
 	Table,
@@ -19,104 +18,37 @@ import { useWallet } from '@suiet/wallet-kit';
 import { PostgrestError } from '@supabase/supabase-js';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { formatDistanceToNowStrict, isPast, parseISO } from 'date-fns';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { MouseEvent, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
+import { WhitelistTable } from '~/components/WhitelistTable';
 import supabase from '~/lib/supabase';
-import { Database } from '~/lib/supabase/db.types';
-import {
-	WhitelistResponse,
-	WhitelistResponseError,
-	getWhitelistByRaffleId,
-	queries,
-	getRaffle,
-	RaffleResponse,
-} from '~/src/services';
+import { queries, RaffleResponse } from '~/src/services';
 
-let itemsPerPage = 8;
-const getPagination = (page: number) => ({
-	from: (page - 1) * itemsPerPage,
-	to: page * itemsPerPage - 1,
-});
-
-const TABLE_PLACEHOLDER = Array(5).fill({
-	address: '...',
-	created_at: '...',
-}) as NonNullable<WhitelistResponse['data']>;
-
-function WhitelistTable({ raffleId }: { raffleId: string }) {
-	let [page, setPage] = useState(1);
-
-	let { data: whitelists } = useQuery<unknown, WhitelistResponseError, WhitelistResponse>({
-		...queries.whitelists.byRaffleId(raffleId, getPagination(page)),
-		queryFn: () => getWhitelistByRaffleId(raffleId, getPagination(page)),
-		staleTime: 1000,
-	});
-
-	let totalItems = whitelists?.count;
-	let totalPages = Math.floor((totalItems ?? 0) / itemsPerPage);
-
+function StringTable({ data }: { data: string[] }) {
 	return (
-		<>
-			<Card mt={40} mb="md">
-				<Table>
-					<thead>
+		<Table>
+			<thead>
+				<tr>
+					<th>No.</th>
+					<th>Discord</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				{data.map((row, i) => {
+					return (
 						<tr>
-							<th>No.</th>
-							<th>Wallet</th>
-							<th style={{ textAlign: 'right' }}>When</th>
-						</tr>
-					</thead>
-					<tbody>
-						{(whitelists?.data ?? TABLE_PLACEHOLDER).map(({ address, created_at }, i) => (
-							<tr key={i}>
-								<td>{(page - 1) * itemsPerPage + (i + 1)}</td>
-								<td style={{ fontFamily: 'monospace' }}>
-									<Link href={`https://explorer.sui.io/address/${address}`}>{address}</Link>
-								</td>
-								<td style={{ textAlign: 'right' }}>
-									{function () {
-										try {
-											return formatDistanceToNowStrict(new Date(created_at));
-										} catch {
-											return '...';
-										}
-									}.call(null)}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</Table>
-			</Card>
-			<Pagination total={totalPages} onChange={setPage} />
-		</>
-	);
-}
-
-function WinnerTable({ winners }: { winners: string[] }) {
-	return (
-		<Card>
-			<Table>
-				<thead>
-					<tr>
-						<th>No.</th>
-						<th style={{ textAlign: 'right' }}>Discord</th>
-					</tr>
-				</thead>
-				<tbody>
-					{winners.map((account, i) => (
-						<tr key={account}>
 							<td>{i + 1}</td>
-							<td style={{ textAlign: 'right' }}>{account}</td>
+							<td>{row}</td>
 						</tr>
-					))}
-				</tbody>
-			</Table>
-		</Card>
+					);
+				})}
+			</tbody>
+		</Table>
 	);
 }
 
@@ -222,20 +154,22 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 
 						{claimButton}
 
-						{!!raffle?.winner && (
+						{!!raffle?.winner && raffle.winner !== 'TBA' && (
 							<Stack spacing={0}>
 								<Divider my="lg" />
 								<Title order={4} align="center">
 									Winner
 								</Title>
-								<WinnerTable winners={raffle?.winner?.split(/\s+/) || []} />
+								<Card>
+									<StringTable data={raffle.winner.split(/\s+/)} />
+								</Card>
 							</Stack>
 						)}
 					</Stack>
 				</Card>
 			</SimpleGrid>
 
-			{raffle && !raffleHasEnded && <WhitelistTable raffleId={id} />}
+			{raffle && !raffleHasEnded && <WhitelistTable raffleId={raffle.id} />}
 		</Flex>
 	);
 };
