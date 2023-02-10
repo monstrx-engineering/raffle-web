@@ -27,6 +27,7 @@ import { Countdown } from '~/components/Countdown';
 import { WhitelistTable } from '~/components/WhitelistTable';
 import supabase from '~/lib/supabase';
 import { queries, RaffleResponse } from '~/src/services';
+import * as Notify from '~/src/features/notification';
 
 function StringTable({ data }: { data: string[] }) {
 	return (
@@ -62,33 +63,17 @@ function useClaimWhitelist(raffle_id: number) {
 			return supabase.from('participant').insert({ raffle_id, address }).throwOnError();
 		},
 
-		onSuccess: () => {
-			showNotification({
-				title: 'Success',
-				message: `Whitelist claimed!`,
-				color: 'green',
-				icon: <IconCheck />,
-			});
+		onSuccess() {
+			Notify.success({ message: `Whitelist claimed!` });
 		},
 
-		onError: (error: PostgrestError) => {
-			let message: string;
-
+		onError(error: PostgrestError) {
 			switch (error.code) {
 				case '23505':
-					message = `Already claimed!`;
-					break;
+					return Notify.error({ message: `Already claimed!` });
 				default:
-					message = error.message;
-					break;
+					return Notify.error({ message: error.message });
 			}
-
-			return showNotification({
-				title: 'Error',
-				color: 'red',
-				icon: <IconX />,
-				message,
-			});
 		},
 	});
 }
