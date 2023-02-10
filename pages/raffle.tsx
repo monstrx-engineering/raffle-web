@@ -206,10 +206,12 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 
 				<Card radius="lg" p="lg">
 					<Stack py={{ lg: 20, 560: 0 }} justify="space-between">
+						{raffle?.end_tz && (
 						<Stack spacing="xs">
 							<Input.Label sx={{ alignSelf: 'center' }}>Ends In</Input.Label>
-							{raffle?.end_tz && <Countdown date={raffle?.end_tz} />}
+								<Countdown date={raffle?.end_tz} />
 						</Stack>
+						)}
 
 						<Stack spacing="xs" align="center">
 							<Input.Label>Tickets Remaining</Input.Label>
