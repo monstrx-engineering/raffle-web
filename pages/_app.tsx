@@ -1,11 +1,9 @@
-import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
+import { MantineProvider } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
-import { getCookie, setCookie } from 'cookies-next';
-import type { GetServerSidePropsContext, NextPage } from 'next';
+import type { NextPage } from 'next';
 import type { AppProps as NextAppProps } from 'next/app';
 import Head from 'next/head';
 import type { ReactElement, ReactNode } from 'react';
-import { useState } from 'react';
 import { Layout } from '~/components/layout';
 import { ReactQueryProvider } from '~/lib/react-query';
 
@@ -19,20 +17,14 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 
 type AppProps = NextAppProps & {
 	Component: NextPageWithLayout;
-	colorScheme: ColorScheme;
 };
+
+const colors = {};
 
 export default function App(props: AppProps) {
 	const { Component, pageProps } = props;
 
 	const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
-
-	const [colorScheme, setColorScheme] = useState<ColorScheme>(props.colorScheme);
-	const toggleColorScheme = (value?: ColorScheme) => {
-		const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
-		setColorScheme(nextColorScheme);
-		setCookie('mantine-color-scheme', nextColorScheme, { maxAge: 30 * 24 * 60 * 60 });
-	};
 
 	return (
 		<>
@@ -42,20 +34,13 @@ export default function App(props: AppProps) {
 				<link rel="shortcut icon" href="/favicon.ico" />
 			</Head>
 
-			<ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-				<MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
-					<NotificationsProvider>
-						<ReactQueryProvider>
-							<WalletProvider>{getLayout(<Component {...pageProps} />)}</WalletProvider>
-						</ReactQueryProvider>
-					</NotificationsProvider>
-				</MantineProvider>
-			</ColorSchemeProvider>
+			<MantineProvider theme={{ colors, colorScheme: 'dark' }} withGlobalStyles withNormalizeCSS>
+				<NotificationsProvider>
+					<ReactQueryProvider>
+						<WalletProvider>{getLayout(<Component {...pageProps} />)}</WalletProvider>
+					</ReactQueryProvider>
+				</NotificationsProvider>
+			</MantineProvider>
 		</>
 	);
 }
-
-App.getInitialProps = ({ ctx }: { ctx: GetServerSidePropsContext }) => ({
-	// get color scheme from cookie
-	colorScheme: getCookie('mantine-color-scheme', ctx) || 'light',
-});

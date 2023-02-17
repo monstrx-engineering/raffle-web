@@ -9,12 +9,12 @@ let truncate = (words: string) => {
 	return `${front}...${back}`;
 };
 
-export function WalletAddress() {
+export function WalletAddress(props: ButtonProps) {
 	const wallet = useWallet();
 	return (
 		<Menu shadow="md" width={200}>
 			<Menu.Target>
-				<Button>{truncate(wallet.address!)}</Button>
+				<Button {...props}>{truncate(wallet.address!)}</Button>
 			</Menu.Target>
 
 			<Menu.Dropdown>
@@ -39,7 +39,7 @@ export function SelectWalletButton(props: ButtonProps) {
 	);
 }
 
-export function ConnectButton() {
+export function ConnectButton(props: ButtonProps) {
 	const wallet = useWallet();
-	return wallet.connected ? <WalletAddress /> : <SelectWalletButton />;
+	return wallet.connected ? <WalletAddress {...props} /> : <SelectWalletButton {...props} />;
 }

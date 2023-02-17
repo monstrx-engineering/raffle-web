@@ -1,10 +1,24 @@
-import { Button, Group, SimpleGrid, Stack, Title } from '@mantine/core';
+import { Button, Center, Container, Group, SimpleGrid, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { RaffleCard } from '~/src/features/raffle-list/components/RaffleCard';
 import { RafflesResponse, RafflesResponseError, getRaffles, queries } from '~/src/services';
 
 export type chain = 'SUI' | 'APTOS';
+
+let Banner = () => (
+	<Center
+		h={88}
+		bg="url('/banner.avif')"
+		bgsz="cover"
+		bgp="top 26% left 0"
+		sx={{ borderRadius: 8 }}
+	>
+		<Title c="white" size={20}>
+			MONSTRX VERSE
+		</Title>
+	</Center>
+);
 
 export default function RaffleListPage() {
 	const { data: raffles } = useQuery<unknown, RafflesResponseError, RafflesResponse>({
@@ -13,20 +27,25 @@ export default function RaffleListPage() {
 	});
 
 	return (
-		<Stack p={60}>
-			<Group position="apart">
-				<Group>
-					<Title order={2}>Raffles</Title>
-				</Group>
+		<Container py={60} size="xl">
+			<Banner />
+
+			<Group position="apart" mt={150} mb="sm">
+				<Title order={1} size={48} c="white">
+					Raffles
+				</Title>
+
 				<Button variant="outline" hidden>
 					Create Raffle
 				</Button>
 			</Group>
+
 			<SimpleGrid
 				cols={2}
 				breakpoints={[
 					{ minWidth: 'sm', cols: 3 },
-					{ minWidth: 'lg', cols: 4 },
+					{ minWidth: 'md', cols: 4 },
+					{ minWidth: 'lg', cols: 5 },
 				]}
 			>
 				{raffles?.data?.map((raffle) => {
@@ -37,8 +56,9 @@ export default function RaffleListPage() {
 
 					const href = `/raffle?id=${raffle.id}`;
 					return (
-						<Link key={href} href={href}>
+						<Link key={href} href={href} passHref>
 							<RaffleCard
+								style={{ cursor: 'pointer' }}
 								name={raffle.name || ''}
 								chain={raffle.chain || ''}
 								image={raffle.image || ''}
@@ -59,6 +79,6 @@ export default function RaffleListPage() {
 					);
 				})}
 			</SimpleGrid>
-		</Stack>
+		</Container>
 	);
 }

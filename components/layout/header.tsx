@@ -1,47 +1,53 @@
 /* eslint-disable prefer-const */
-import { ActionIcon, Group, Header, MediaQuery, Title } from '@mantine/core';
-import { IconBrandDiscord, IconBrandTwitter } from '@tabler/icons';
-import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { Container, Group, Header, Image, MediaQuery } from '@mantine/core';
 import { ConnectButton } from '../ConnectButton';
 
-let IconButton = ({ size, color, icon: Icon, radius = Math.floor(size / 2), ...props }) => (
-	<ActionIcon {...props} color={color} variant="filled" radius={radius} size={size}>
-		<Icon size={radius - 2} />
-	</ActionIcon>
-);
+const BG = {
+	background: `
+		url('/spirit.webp') 
+		top 51% left 50% / 120px auto
+		rgba(123, 192, 255, 0.8)
+	`,
+	backgroundBlendMode: 'multiply',
+};
 
-export function DefaultHeader() {
+export function DefaultHeader({ height = 97 }) {
 	return (
-		<Header height={60}>
-			<Group sx={{ height: '100%' }} px={20} position="apart">
-				<Group>
-					<Title order={2} mr="sm">
-						SuiMonstrx
-					</Title>
-					<IconButton
-						component="a"
-						href={process.env.NEXT_PUBLIC_TWITTER_URL}
-						target="_blank"
-						color="blue.5"
-						size={32}
-						icon={IconBrandTwitter}
-					/>
-					<IconButton
-						component="a"
-						href={process.env.NEXT_PUBLIC_DISCORD_URL}
-						target="_blank"
-						color="indigo.7"
-						size={32}
-						icon={IconBrandDiscord}
-					/>
-				</Group>
-				<MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-					<Group spacing={6}>
-						<ConnectButton />
-						<ColorSchemeToggle />
+		<Header bg="dark.8" height={height}>
+			<Container px={32} size="xl">
+				<Group position="apart" h={height}>
+					<Group>
+						<Image height={67} src="/logo.png" />
 					</Group>
-				</MediaQuery>
-			</Group>
+
+					<Group
+						sx={{
+							a: {
+								color: 'white',
+								textDecoration: 'none',
+								'&:hover': { textDecoration: 'underline' },
+							},
+						}}
+					>
+						{/* <Link href="/">Home</Link> */}
+						{/* <Link href="/">Raffle</Link> */}
+						{/* <Link href="/">Resources</Link> */}
+					</Group>
+
+					<ConnectButton
+						h={48}
+						w={148}
+						radius={12}
+						styles={{
+							root: { ...BG, '&:hover': BG },
+						}}
+					/>
+
+					<MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+						<></>
+					</MediaQuery>
+				</Group>
+			</Container>
 		</Header>
 	);
 }
