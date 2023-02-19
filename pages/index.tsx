@@ -30,7 +30,7 @@ export default function RaffleListPage() {
 		<Container py={60} size="xl">
 			<Banner />
 
-			<Group position="apart" mt={150} mb="sm">
+			<Group position="apart" mt={50} mb="sm">
 				<Title order={1} size={48} c="white">
 					Raffles
 				</Title>
