@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 import { Container, Group, Header, Image, MediaQuery } from '@mantine/core';
 import { ConnectButton } from '../ConnectButton';
+import Link from 'next/link';
 
 const BG = {
 	background: `
@@ -17,22 +18,24 @@ export function DefaultHeader({ height = 97 }) {
 			<Container px={32} size="xl">
 				<Group position="apart" h={height}>
 					<Group>
-						{/* <Image height={67} src="/logo.png" /> */}
+						<Image width={97} src="/logo.png" />
 					</Group>
 
-					<Group
-						sx={{
-							a: {
-								color: 'white',
-								textDecoration: 'none',
-								'&:hover': { textDecoration: 'underline' },
-							},
-						}}
-					>
-						{/* <Link href="/">Home</Link> */}
-						{/* <Link href="/">Raffle</Link> */}
-						{/* <Link href="/">Resources</Link> */}
-					</Group>
+					<MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
+						<Group
+							sx={{
+								a: {
+									color: 'white',
+									textDecoration: 'none',
+									'&:hover': { textDecoration: 'underline' },
+								},
+							}}
+						>
+							<Link href="//suimonstrx.xyz">Home</Link>
+							<Link href="//raffle.suimonstrx.xyz">Raffle</Link>
+							<Link href="//linktr.ee/SuiMonstrX">Resources</Link>
+						</Group>
+					</MediaQuery>
 
 					<ConnectButton
 						h={48}
@@ -42,10 +45,6 @@ export function DefaultHeader({ height = 97 }) {
 							root: { ...BG, '&:hover': BG },
 						}}
 					/>
-
-					<MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-						<></>
-					</MediaQuery>
 				</Group>
 			</Container>
 		</Header>
