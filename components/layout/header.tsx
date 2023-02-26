@@ -17,7 +17,7 @@ export function DefaultHeader({ height = 97 }) {
 			<Container px={32} size="xl">
 				<Group position="apart" h={height}>
 					<Group>
-						<Image height={67} src="/logo.png" />
+						{/* <Image height={67} src="/logo.png" /> */}
 					</Group>
 
 					<Group
