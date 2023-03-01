@@ -31,7 +31,7 @@
 		"@mantine/next": "5.9.0",
 		"@mantine/notifications": "5.9.0",
 		"@next/bundle-analyzer": "^12.3.1",
-		"@suiet/wallet-kit": "^0.1.11",
+		"@suiet/wallet-kit": "^0.1.26",
 		"@supabase/supabase-js": "^2.2.1",
 		"@tabler/icons": "^1.107.0",
 		"@tanstack/react-query": "^4.20.4",
