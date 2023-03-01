@@ -17,34 +17,35 @@ export function DefaultHeader({ height = 97 }) {
 		<Header bg="dark.8" height={height}>
 			<Container px={32} size="xl">
 				<Group position="apart" h={height}>
+					<Image width={97} src="/logo.png" />
+
 					<Group>
-						<Image width={97} src="/logo.png" />
-					</Group>
+						<MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
+							<Group
+								mr={40}
+								sx={{
+									a: {
+										color: 'white',
+										textDecoration: 'none',
+										'&:hover': { textDecoration: 'underline' },
+									},
+								}}
+							>
+								<Link href="https://suimonstrx.xyz">Home</Link>
+								<Link href="https://raffle.suimonstrx.xyz">Raffle</Link>
+								<Link href="https://linktr.ee/SuiMonstrX">Resources</Link>
+							</Group>
+						</MediaQuery>
 
-					<MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
-						<Group
-							sx={{
-								a: {
-									color: 'white',
-									textDecoration: 'none',
-									'&:hover': { textDecoration: 'underline' },
-								},
+						<ConnectButton
+							h={48}
+							w={148}
+							radius={12}
+							styles={{
+								root: { ...BG, '&:hover': BG },
 							}}
-						>
-							<Link href="//suimonstrx.xyz">Home</Link>
-							<Link href="//raffle.suimonstrx.xyz">Raffle</Link>
-							<Link href="//linktr.ee/SuiMonstrX">Resources</Link>
-						</Group>
-					</MediaQuery>
-
-					<ConnectButton
-						h={48}
-						w={148}
-						radius={12}
-						styles={{
-							root: { ...BG, '&:hover': BG },
-						}}
-					/>
+						/>
+					</Group>
 				</Group>
 			</Container>
 		</Header>
