@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Container, Group, Header, Image, MediaQuery } from '@mantine/core';
-import { ConnectButton } from '../ConnectButton';
 import Link from 'next/link';
+import { ConnectButton } from '../ConnectButton';
 
 const BG = {
 	background: `

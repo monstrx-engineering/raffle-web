@@ -7,80 +7,88 @@ import {
 	Flex,
 	Image,
 	Input,
+	Menu,
 	SimpleGrid,
 	Stack,
-	Table,
 	Text,
 	Title,
 } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
+import { useLocalStorage } from '@mantine/hooks';
+import { hideNotification, showNotification, updateNotification } from '@mantine/notifications';
 import { useWallet } from '@suiet/wallet-kit';
 import { PostgrestError } from '@supabase/supabase-js';
-import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
+import {
+	IconArrowBack,
+	IconBrandDiscord,
+	IconCheck,
+	IconSwitchHorizontal,
+	IconX,
+} from '@tabler/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+	fetchImplicitAccessToken,
+	ImplicitGrantDone,
+	Profile as DiscordProfile,
+} from 'lib/discord';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { SelectWalletButton } from '~/components/ConnectButton';
 import { Countdown } from '~/components/Countdown';
+import { SplitButton } from '~/components/SplitButton';
 import { WhitelistTable } from '~/components/WhitelistTable';
+import { WinnerTable } from '~/components/WinnerTable';
 import supabase from '~/lib/supabase';
 import { queries, RaffleResponse } from '~/src/services';
-import * as Notify from '~/src/features/notification';
 
-function StringTable({ data }: { data: string[] }) {
-	return (
-		<Table>
-			<thead>
-				<tr>
-					<th>No.</th>
-					<th>Discord</th>
-				</tr>
-			</thead>
-
-			<tbody>
-				{data.map((row, i) => {
-					return (
-						<tr>
-							<td>{i + 1}</td>
-							<td>{row}</td>
-						</tr>
-					);
-				})}
-			</tbody>
-		</Table>
-	);
-}
-
-export type RaffleDetailProps = { data: RaffleResponse };
+export type RaffleDetailProps = { raffle: RaffleResponse };
 export type RaffleDetailPageProps = { id: string | string[] | undefined };
+
+const SUCCESS = {
+	title: 'Success',
+	color: 'green',
+	icon: <IconCheck />,
+};
+
+const ERROR = {
+	title: 'Error',
+	color: 'red',
+	icon: <IconX />,
+};
+
+const LOADING = {
+	loading: true,
+	autoClose: false,
+	disallowClose: true,
+};
 
 function useClaimWhitelist(raffle_id: number) {
 	return useMutation({
 		mutationFn: async (address: string) => {
 			if (!address) throw Error('no wallet connected');
-			return supabase.from('participant').insert({ raffle_id, address }).throwOnError();
+			return await supabase.from('participant').insert({ raffle_id, address }).throwOnError();
 		},
 
-		onSuccess() {
-			Notify.success({ message: `Whitelist claimed!` });
+		onSuccess(data, _, context) {
+			showNotification({
+				...SUCCESS,
+				message: `Whitelist claimed!`,
+			});
 		},
 
 		onError(error: PostgrestError) {
 			switch (error.code) {
 				case '23505':
-					return Notify.error({ message: `Already claimed!` });
+					return { ...ERROR, message: `Already claimed!` };
 				default:
-					return Notify.error({ message: error.message });
+					return { ...ERROR, message: error.message };
 			}
 		},
 	});
 }
 
-const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
-	let wallet = useWallet();
-
+const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 	// @ts-ignore
 	let raffleDeadline = new Date(raffle.end_tz).toJSON();
 	let raffleHasEnded = !!raffleDeadline && raffleDeadline < new Date().toJSON();
@@ -89,16 +97,50 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 
 	let { mutate: claim } = useClaimWhitelist(raffle.id!);
 
-	const claimButton = !wallet.connected ? (
-		<SelectWalletButton size="lg" color="cyan">
-			Connect Wallet to Claim
-		</SelectWalletButton>
-	) : (
+	let [credentials, setCredentials] = useLocalStorage<ImplicitGrantDone | null>({
+		key: 'discord-token',
+		defaultValue: null,
+	});
+
+	let discordAuth = useMutation({
+		mutationFn: fetchImplicitAccessToken,
+		retry: false,
+
+		onMutate: (state) => {
+			let id = state || crypto.randomUUID();
+
+			showNotification({
+				...LOADING,
+				id,
+				title: 'Awaiting approval',
+				message: 'Need your explicit authorization to access to your Discord identity.',
+			});
+
+			return { id };
+		},
+
+		onSuccess: (data, _, context) => {
+			setCredentials(data);
+			hideNotification(context?.id!);
+		},
+
+		onError: (error: Error, _, context) => {
+			updateNotification({
+				...ERROR,
+				id: context?.id!,
+				message: error.message,
+			});
+		},
+	});
+
+	let wallet = useWallet();
+
+	const claimButton = wallet.address ? (
 		<Button
 			size="lg"
 			color="cyan"
-			onClick={() => claim(wallet.address!)}
-			disabled={!wallet.address || remaining < 1 || raffleHasEnded}
+			onClick={() => sign().then(() => claim(wallet.address!))}
+			disabled={remaining < 1 || raffleHasEnded}
 		>
 			{(() => {
 				switch (true) {
@@ -111,7 +153,99 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 				}
 			}).call()}
 		</Button>
+	) : (
+		<SelectWalletButton size="lg" color="cyan">
+			Connect Wallet to Claim
+		</SelectWalletButton>
 	);
+
+	const discordAccessToken = credentials?.access_token;
+	let discordProfile = useQuery({
+		queryKey: ['discord', 'profile', discordAccessToken],
+		queryFn: () => DiscordProfile.get(discordAccessToken!),
+		enabled: !!discordAccessToken,
+		retry: false,
+
+		onSuccess({ user }) {
+			updateNotification({
+				id: discordAuth.context?.id!,
+				title: 'Success',
+				color: 'green',
+				icon: <IconCheck />,
+				message: `Welcome ${user.username}#${user.discriminator}`,
+			});
+		},
+	});
+
+	let discordLogout = () => {
+		setCredentials(null);
+		discordAuth.reset();
+		discordProfile.remove();
+	};
+
+	let discordProfileData = discordProfile.data?.user;
+
+	const discordAvatar = useMemo(
+		() =>
+			Boolean(discordProfileData?.id && discordProfileData?.avatar) ? (
+				<Image
+					radius="lg"
+					width={32}
+					src={DiscordProfile.getAvatarURL(discordProfileData.id, discordProfileData.avatar)}
+				/>
+			) : null,
+		[discordProfileData?.id, discordProfileData?.avatar]
+	);
+
+	const discordButton = !discordProfileData ? (
+		<Button
+			size="lg"
+			loading={discordAuth.isLoading}
+			leftIcon={<IconBrandDiscord />}
+			onClick={() => discordAuth.mutate('')}
+		>
+			Connect Discord
+		</Button>
+	) : (
+		<SplitButton
+			button={
+				<Button fullWidth size="lg" color="indigo.7" leftIcon={discordAvatar}>
+					{`${discordProfileData.username}#${discordProfileData.discriminator}`}
+				</Button>
+			}
+		>
+			<Menu.Dropdown>
+				<Menu.Item onClick={discordLogout} icon={<IconSwitchHorizontal size={16} stroke={1.5} />}>
+					Change Account
+				</Menu.Item>
+			</Menu.Dropdown>
+		</SplitButton>
+	);
+
+	async function sign() {
+		return console.log(wallet.name);
+		try {
+			let metadata = {
+				url: window.location.host,
+				wallet: wallet.address,
+				discord: discordAccessToken,
+			};
+
+			let message = new TextEncoder().encode(JSON.stringify(metadata));
+			let { signature } = await wallet.signMessage({ message });
+			let key = wallet.account?.publicKey!;
+
+			let body = new Uint8Array(64 + 32 + message.byteLength);
+			body.set(signature, 0);
+			body.set(key, 64);
+			body.set(message, 64 + 32);
+
+			return fetch('/api/verify', { method: 'POST', body }).then((r) => r.json());
+		} catch (e) {
+			console.error(e);
+			throw e;
+		}
+	}
 
 	return (
 		<Flex p={60} align="center" direction="column">
@@ -149,24 +283,27 @@ const RaffleDetail = ({ data: raffle }: RaffleDetailProps) => {
 							<Text>{`${String(remaining).padStart(3, '0')}/${raffle.ticket_max}`}</Text>
 						</Stack>
 
-						{claimButton}
+						<Stack px="md">
+							{discordButton}
+							{claimButton}
+						</Stack>
 
-						{!!raffle.winner && raffle.winner !== 'TBA' && (
+						{Boolean(raffle.winner) && raffle.winner != 'TBA' && (
 							<Stack spacing={0}>
 								<Divider my="lg" />
+
 								<Title order={4} align="center">
 									Winner
 								</Title>
-								<Card>
-									<StringTable data={raffle.winner.split(/\s+/)} />
-								</Card>
+
+								<WinnerTable winners={raffle.winner.split(/\s+/)} />
 							</Stack>
 						)}
 					</Stack>
 				</Card>
 			</SimpleGrid>
 
-			{raffle && !raffleHasEnded && <WhitelistTable raffleId={raffle.id} />}
+			{raffle?.id && !raffleHasEnded && <WhitelistTable raffleId={raffle.id} />}
 		</Flex>
 	);
 };
@@ -177,9 +314,11 @@ const RaffleDetailPage: NextPage<RaffleDetailPageProps> = (props) => {
 	let param = props.id || router.query.id;
 	let id = Array.isArray(param) ? param[0] : param;
 
-	let { data, isSuccess } = useQuery({ ...queries.raffles.detail(id!), enabled: !!id });
+	let { data: raffle, isSuccess } = useQuery({ ...queries.raffles.detail(id!), enabled: !!id });
 
-	return isSuccess ? <RaffleDetail data={data} /> : null;
+	if (!isSuccess || !raffle) return null;
+
+	return <RaffleDetail raffle={raffle} />;
 };
 
 RaffleDetailPage.getInitialProps = ({ query }) => ({ id: query.id });
