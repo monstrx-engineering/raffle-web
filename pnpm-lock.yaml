@@ -21,6 +21,7 @@ specifiers:
   '@testing-library/jest-dom': ^5.16.3
   '@testing-library/react': ^13.0.0
   '@testing-library/user-event': ^14.0.4
+  '@tsndr/cloudflare-worker-jwt': ^2.2.1
   '@types/jest': ^27.4.1
   '@types/node': ^18.11.4
   '@types/react': 18.0.21
@@ -72,6 +73,7 @@ dependencies:
   '@supabase/supabase-js': 2.2.1
   '@tabler/icons': 1.116.1_biqbaboplfbrettd7655fr4n2y
   '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
+  '@tsndr/cloudflare-worker-jwt': 2.2.1
   cookies-next: 2.1.1
   count-down-react: 1.0.12_biqbaboplfbrettd7655fr4n2y
   date-fns: 2.29.3
@@ -3995,6 +3997,10 @@ packages:
   /@trysound/sax/0.2.0:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
+    dev: false
+
+  /@tsndr/cloudflare-worker-jwt/2.2.1:
+    resolution: {integrity: sha512-yYxjmag5AXXs7FDCUlse8cCTQlug3fbrqUb4/s4kvdauOg5wq2V6BayHD/OUWOGmgohefFRqu4vA5phU3+Cyng==}
     dev: false
 
   /@types/aria-query/4.2.2:
