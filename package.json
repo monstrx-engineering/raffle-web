@@ -5,7 +5,7 @@
 	"scripts": {
 		"ssl": "caddy run",
 		"dev": "pnpm ssl & pnpm wrangler",
-		"wrangler": "wrangler pages dev --port 8001 --proxy 3001 -- pnpm next",
+		"wrangler": "wrangler pages dev --compatibility-date=2022-11-30 --port 8001 --proxy 3001 -- pnpm next",
 		"next": "next dev -p 3000",
 		"build": "next build",
 		"analyze": "ANALYZE=true next build",

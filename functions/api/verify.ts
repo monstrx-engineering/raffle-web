@@ -2,7 +2,7 @@ import type {
 	JsonWebKey,
 	PagesFunction,
 	SubtleCryptoImportKeyAlgorithm,
-} from '@cloudflare/workers-types';
+} from '@cloudflare/workers-types/2022-11-30';
 import jwt from '@tsndr/cloudflare-worker-jwt';
 
 type Request = {
