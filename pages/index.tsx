@@ -9,10 +9,10 @@ export type chain = 'SUI' | 'APTOS';
 let Banner = () => (
 	<Center
 		h={88}
-		bg="url('/banner.avif')"
-		bgsz="cover"
-		bgp="top 26% left 0"
-		sx={{ borderRadius: 8 }}
+		sx={{
+			borderRadius: 8,
+			background: `url('/banner.avif') top 26% left 0 / cover`,
+		}}
 	>
 		<Title c="white" size={20}>
 			MONSTRX VERSE
