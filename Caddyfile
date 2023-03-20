@@ -1,7 +1,8 @@
-:3001 {
-	reverse_proxy http://localhost:3000
-}
+:8788 
+	tls cert.pem key.pem
 
-:8788 {
-	reverse_proxy http://localhost:8001
+	reverse_proxy {
+		to :8001
+		transport http
+	}
 }
