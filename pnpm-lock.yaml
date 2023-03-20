@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@babel/core': ^7.17.8
+  '@cloudflare/workers-types': ^4.20230307.0
   '@emotion/react': ^11.10.4
   '@emotion/server': ^11.10.0
   '@lukemorales/query-key-factory': ^1.0.3
@@ -83,6 +84,7 @@ dependencies:
 
 devDependencies:
   '@babel/core': 7.20.5
+  '@cloudflare/workers-types': 4.20230307.0
   '@next/eslint-plugin-next': 12.3.4
   '@storybook/react': 6.5.14_mnsloq7kgj27gef2v6dwxuyniq
   '@testing-library/dom': 8.19.0
@@ -1496,6 +1498,10 @@ packages:
 
   /@bcoe/v8-coverage/0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+    dev: true
+
+  /@cloudflare/workers-types/4.20230307.0:
+    resolution: {integrity: sha512-Go968aDDcqONHQcUdgIiPRkPdT4QTzD0ecHJsI1u7ZiHPMOoZn+Dy7hYsdUJ5ldX9wTZDrICBM1rDKTRaDUitg==}
     dev: true
 
   /@colors/colors/1.5.0:

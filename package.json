@@ -3,8 +3,10 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "wrangler pages dev --proxy 3000 --compatibility-date=2023-02-09 -- pnpm dev:next",
-		"dev:next": "next dev",
+		"ssl": "caddy run",
+		"dev": "pnpm ssl & pnpm wrangler",
+		"wrangler": "wrangler pages dev --port 8001 --proxy 3001 -- pnpm next",
+		"next": "next dev -p 3000",
 		"build": "next build",
 		"analyze": "ANALYZE=true next build",
 		"start": "next start",
@@ -45,6 +47,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.8",
+		"@cloudflare/workers-types": "^4.20230307.0",
 		"@next/eslint-plugin-next": "^12.1.4",
 		"@storybook/react": "^6.5.13",
 		"@testing-library/dom": "^8.12.0",

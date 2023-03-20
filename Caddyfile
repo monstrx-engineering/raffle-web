@@ -1,0 +1,7 @@
+:3001 {
+	reverse_proxy http://localhost:3000
+}
+
+:8788 {
+	reverse_proxy http://localhost:8001
+}
