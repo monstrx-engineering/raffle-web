@@ -32,7 +32,7 @@ const partition = (bytes: ArrayBuffer, indexes: number[]) => {
 };
 
 const Validator = {
-	discord: (token) =>
+	discord: (token: string) =>
 		fetch(`https://discord.com/api/oauth2/@me`, {
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -53,7 +53,10 @@ export const onRequest: PagesFunction = async (context) => {
 	if (claims.discord) {
 		validated.discord = await Validator.discord(claims.discord)
 			.then(({ user }) => `${user.username}#${user.discriminator}`)
-			.catch(() => false);
+			.catch((e) => {
+				console.error(e);
+				return false;
+			});
 	}
 
 	let token = await jwt.sign(
@@ -61,8 +64,8 @@ export const onRequest: PagesFunction = async (context) => {
 			iss: 'supabase',
 			ref: 'lmxcedbadtekgdeasjfn',
 			role: 'anon',
-			iat: 1670590664,
-			exp: 1986166664,
+			exp: Math.floor(Date.now() / 1000 + 24 * 60 * 60),
+			// iat:  Math.floor(Date.now() / 1000), // implicitly inserted
 			...validated,
 		},
 		context.env.JWT_SECRET
@@ -72,7 +75,7 @@ export const onRequest: PagesFunction = async (context) => {
 		status: 200,
 		headers: {
 			'content-type': 'application/json;charset=UTF-8',
-			'set-cookie': `monstrx-token=${token};`,
+			'set-cookie': `__Host-monstrx-token=${token}; Secure; Path=/;`,
 		},
 	});
 };

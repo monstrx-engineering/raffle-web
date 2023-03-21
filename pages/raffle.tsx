@@ -67,7 +67,7 @@ function useClaimWhitelist(raffle_id: number) {
 	return useMutation({
 		mutationFn: async (address: string) => {
 			if (!address) throw Error('no wallet connected');
-			return await supabase.from('participant').insert({ raffle_id, address }).throwOnError();
+			return supabase.from('participant').insert({ raffle_id, address }).throwOnError();
 		},
 
 		onSuccess(data, _, context) {
@@ -139,7 +139,13 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 		<Button
 			size="lg"
 			color="cyan"
-			onClick={() => sign().then(() => claim(wallet.address!))}
+			onClick={() =>
+				sign({
+					url: window.location.host,
+					wallet: wallet.address,
+					discord: discordAccessToken,
+				}).then(() => claim(wallet.address!))
+			}
 			disabled={remaining < 1 || raffleHasEnded}
 		>
 			{(() => {
@@ -175,6 +181,10 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 				message: `Welcome ${user.username}#${user.discriminator}`,
 			});
 		},
+
+		onError(e) {
+			discordLogout();
+		},
 	});
 
 	let discordLogout = () => {
@@ -187,7 +197,7 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 
 	const discordAvatar = useMemo(
 		() =>
-			Boolean(discordProfileData?.id && discordProfileData?.avatar) ? (
+			discordProfileData?.id && discordProfileData?.avatar ? (
 				<Image
 					radius="lg"
 					width={32}
@@ -222,15 +232,8 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 		</SplitButton>
 	);
 
-	async function sign() {
-		return console.log(wallet.name);
+	async function sign(metadata: Record<string, string>) {
 		try {
-			let metadata = {
-				url: window.location.host,
-				wallet: wallet.address,
-				discord: discordAccessToken,
-			};
-
 			let message = new TextEncoder().encode(JSON.stringify(metadata));
 			let { signature } = await wallet.signMessage({ message });
 			let key = wallet.account?.publicKey!;
@@ -240,7 +243,7 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 			body.set(key, 64);
 			body.set(message, 64 + 32);
 
-			return fetch('/api/verify', { method: 'POST', body }).then((r) => r.json());
+			return await fetch('/api/verify', { method: 'POST', body }).then((r) => r.json());
 		} catch (e) {
 			console.error(e);
 			throw e;
