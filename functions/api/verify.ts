@@ -59,12 +59,13 @@ export const onRequest: PagesFunction = async (context) => {
 			});
 	}
 
+	const tomorrow = Math.floor(Date.now() / 1000 + 24 * 60 * 60);
 	let token = await jwt.sign(
 		{
 			iss: 'supabase',
 			ref: 'lmxcedbadtekgdeasjfn',
 			role: 'anon',
-			exp: Math.floor(Date.now() / 1000 + 24 * 60 * 60),
+			exp: tomorrow,
 			// iat:  Math.floor(Date.now() / 1000), // implicitly inserted
 			...validated,
 		},
@@ -75,7 +76,9 @@ export const onRequest: PagesFunction = async (context) => {
 		status: 200,
 		headers: {
 			'content-type': 'application/json;charset=UTF-8',
-			'set-cookie': `__Host-monstrx-token=${token}; Secure; Path=/;`,
+			'set-cookie': `__Host-monstrx-token=${token}; Secure; Path=/; Expires=${new Date(
+				tomorrow * 1000
+			).toUTCString()};`,
 		},
 	});
 };
