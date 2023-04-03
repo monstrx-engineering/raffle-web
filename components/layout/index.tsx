@@ -1,4 +1,4 @@
-import { AppShell } from '@mantine/core';
+import { AppShell, Center } from '@mantine/core';
 import type { ReactNode } from 'react';
 
 import { DefaultHeader } from './header';
@@ -19,6 +19,9 @@ export function Layout({ children }: { children: ReactNode }) {
 			header={<DefaultHeader />}
 			footer={<DefaultFooter />}
 		>
+			<Center py={8} bg="#e6effe" c="dark" fw="bold" td="underline">
+				Announcement: wallet signing feature under maintenance
+			</Center>
 			{children}
 		</AppShell>
 	);
