@@ -20,7 +20,7 @@ export function Layout({ children }: { children: ReactNode }) {
 			footer={<DefaultFooter />}
 		>
 			<Center py={8} bg="#e6effe" c="dark" fw="bold" td="underline">
-				Announcement: wallet signing feature under maintenance
+				Announcement: Use Sui Wallet or Ethos Wallet for Signing feature
 			</Center>
 			{children}
 		</AppShell>
