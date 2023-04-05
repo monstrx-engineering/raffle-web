@@ -30,6 +30,7 @@
 		"@mantine/hooks": "5.9.0",
 		"@mantine/next": "5.9.0",
 		"@mantine/notifications": "5.9.0",
+		"@mysten/sui.js": "*",
 		"@next/bundle-analyzer": "^12.3.1",
 		"@suiet/wallet-kit": "^0.2.4",
 		"@supabase/supabase-js": "^2.2.1",

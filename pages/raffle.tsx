@@ -142,9 +142,9 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 			onClick={() =>
 				sign({
 					url: window.location.host,
-					wallet: wallet.address,
-					discord: discordAccessToken,
-				}).then(() => claim(wallet.address!))
+					wallet: wallet.address ?? '',
+					discord: discordAccessToken ?? '',
+				} as const).then(() => claim(wallet.address!))
 			}
 			disabled={remaining < 1 || raffleHasEnded}
 		>
@@ -235,15 +235,12 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 	async function sign(metadata: Record<string, string>) {
 		try {
 			let message = new TextEncoder().encode(JSON.stringify(metadata));
-			let { signature } = await wallet.signMessage({ message });
-			let key = wallet.account?.publicKey!;
+			let { signature, messageBytes } = await wallet.signMessage({ message });
 
-			let body = new Uint8Array(64 + 32 + message.byteLength);
-			body.set(signature, 0);
-			body.set(key, 64);
-			body.set(message, 64 + 32);
+			let body = JSON.stringify({ signature, message: messageBytes });
 
-			return await fetch('/api/verify', { method: 'POST', body }).then((r) => r.json());
+			let response = await fetch('/api/verify', { method: 'POST', body });
+			return await response.json();
 		} catch (e) {
 			console.error(e);
 			throw e;

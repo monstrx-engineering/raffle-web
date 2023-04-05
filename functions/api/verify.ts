@@ -1,34 +1,9 @@
+import { verifyMessage, IntentScope } from '@mysten/sui.js';
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import type {
 	PagesFunction,
 	SubtleCryptoImportKeyAlgorithm as Algorithm,
-} from '@cloudflare/workers-types/2022-11-30';
-
-type Request = {
-	signature: Parameters<typeof crypto.subtle.verify>[2];
-	message: Parameters<typeof crypto.subtle.verify>[3];
-	publicKey: Parameters<typeof crypto.subtle.importKey>[1];
-};
-
-const REQUEST_ENCRYPTION: Algorithm = {
-	name: 'NODE-ED25519',
-	namedCurve: 'NODE-ED25519',
-};
-
-async function verify({ signature, message, publicKey }: Request) {
-	let key = await crypto.subtle.importKey('raw', publicKey, REQUEST_ENCRYPTION, false, ['verify']);
-	return crypto.subtle.verify(REQUEST_ENCRYPTION, key, signature, message);
-}
-
-const partition = (bytes: ArrayBuffer, indexes: number[]) => {
-	let cursor = 0;
-
-	return indexes.map((index) => {
-		let chunk = new DataView(bytes, cursor, index);
-		cursor += index;
-		return chunk;
-	});
-};
+} from '@cloudflare/workers-types';
 
 const Validator = {
 	discord: (token: string) =>
@@ -39,15 +14,20 @@ const Validator = {
 		}).then((r) => r.json()),
 };
 
+type Base64 = string;
+type Request = {
+	signature: Base64;
+	message: Base64;
+};
+
 export const onRequest: PagesFunction<{ JWT_SECRET: string }> = async (context) => {
 	try {
-		let bytes = await context.request.arrayBuffer();
-		let [signature, publicKey, message] = partition(bytes, [64, 32, undefined]);
-		let ok = await verify({ signature, publicKey, message });
+		let { signature, message } = await context.request.json<Request>();
+		let ok = await verifyMessage(message, signature, IntentScope.PersonalMessage);
 
 		if (!ok) throw Error();
 
-		let claims = JSON.parse(new TextDecoder().decode(message)) as Record<string, string>;
+		let claims = JSON.parse(atob(message)) satisfies Record<string, string>;
 
 		let validated: Record<string, string> = { wallet: claims.wallet };
 		if (claims.discord) {
