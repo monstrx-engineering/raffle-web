@@ -32,7 +32,8 @@ export function DefaultHeader({ height = 97 }) {
 								}}
 							>
 								<Link href="https://suimonstrx.xyz">Home</Link>
-								<Link href="https://raffle.suimonstrx.xyz">Raffle</Link>
+								<Link href="/">Raffle</Link>
+								<Link href="/pfp">PFP</Link>
 								<Link href="https://linktr.ee/SuiMonstrX">Resources</Link>
 							</Group>
 						</MediaQuery>
