@@ -20,7 +20,7 @@ export default function ProfilePicturePage() {
 		<Container py={60} size="xl" h="100%">
 			<SimpleGrid cols={6} h="100%" sx={{ flex: 1 }}>
 				<TypeCard name="hyperion" />
-				<TypeCard name="spirit" />
+				<TypeCard name="noface" />
 				<TypeCard name="nusku" />
 				<TypeCard name="enki" />
 				<TypeCard name="venti" />
