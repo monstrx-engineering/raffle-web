@@ -35,9 +35,24 @@ export default function TypeDetailPage() {
 					<Button onClick={generate}>Generate</Button>
 				</Stack>
 				<Card sx={{ flex: 1 }}>
-					<h2>PFP Generator</h2>
+					<h3>PFP Generator</h3>
 					<h5>{String(type).toUpperCase()}</h5>
-					<p>blabla</p>
+
+					<h3>Description</h3>
+					<p>
+						{function () {
+							switch (type) {
+								case 'nusku':
+									return `Nusku is a fierce and powerful monster that is imbued with the element of fire. Its hand radiates with intense heat, and its eyes glow with a fierce intensity. Nusku has the ability to control the power of fire, using it to create powerful flames, scorching heat, and even summon destructive infernos. It is a fearsome opponent that can cause massive destruction with its powers, but can also be a powerful ally to those who join the cult as a warlock.`;
+							}
+						}.call()}
+					</p>
+
+					<h3>How To</h3>
+					<ol style={{ marginLeft: 20, padding: 0 }}>
+						<li>Just click generate</li>
+						<li>Save as!</li>
+					</ol>
 				</Card>
 			</Group>
 		</Container>
