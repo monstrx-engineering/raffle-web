@@ -43,7 +43,42 @@ export default function TypeDetailPage() {
 						{function () {
 							switch (type) {
 								case 'nusku':
-									return `Nusku is a fierce and powerful monster that is imbued with the element of fire. Its hand radiates with intense heat, and its eyes glow with a fierce intensity. Nusku has the ability to control the power of fire, using it to create powerful flames, scorching heat, and even summon destructive infernos. It is a fearsome opponent that can cause massive destruction with its powers, but can also be a powerful ally to those who join the cult as a warlock.`;
+									return `Nusku has the ability to control the power of fire, using it to create powerful flames, scorching heat, and even summon destructive infernos. He spent his time in the fighting ring at The Eden. He never wanted to hurt anyone, but he loved the adrenaline of being in a fight`;
+							}
+						}.call()}
+							
+						{function () {
+							switch (type) {
+								case 'enki':
+									return `Enki has the ability to control and manipulate water, using it to summon powerful tidal waves, create devastating floods, and even control the weather. It is a graceful and powerful creature, but also possesses a calm and serene nature that makes it a valuable ally to those who respect its power`;
+							}
+						}.call()}
+
+						{function () {
+							switch (type) {
+								case 'venti':
+									return `Venti mastering the winds & storm, a free-spirited entity, enjoy playing songs, whose mischievous nature and sing-song attitude can sometimes irritate others around him with how flippant she is`;
+							}
+						}.call()}
+
+						{function () {
+							switch (type) {
+								case 'hyperion':
+									return `The God of Heavenly Light `;
+							}
+						}.call()}
+
+						{function () {
+							switch (type) {
+								case 'yugaea':
+									return `God of heavenly light & depicted as a handsome young man crowned with the shining aureole of the Sun who watch the earth across the sky everydayYugaea is an earth elemental, he’s the real definition of cheerful and joyful, he brings happiness to other MonstrS and living being on earth, he loves being outside with his best mate Enki and digging in their earth to discover how civilizations flourished or fell.`;
+							}
+						}.call()}
+
+						{function () {
+							switch (type) {
+								case 'noface':
+									return `Spirit represents the power of positivity and kindness, Its body is translucent, and it seems to be made up of pure energy. Spirit has the ability to manipulate the spiritual energies of the world, using them to heal wounds, dispel curses, and summon powerful protective wards. It is a gentle and benevolent creature, but also possesses a fearsome power that can overwhelm those who threaten it or its allies.`;
 							}
 						}.call()}
 					</p>
