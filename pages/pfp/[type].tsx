@@ -28,9 +28,9 @@ export default function TypeDetailPage() {
 			<Group spacing="lg">
 				<Stack>
 					{image ? (
-						<Image src={image} width={400} height={400} withPlaceholder placeholder={<Loader />} />
+						<Image src={image} width={388} height={388} withPlaceholder placeholder={<Loader />} />
 					) : (
-						<Box w={400} h={400} sx={{ border: `.1px solid white` }} />
+						<Box w={388} h={388}  />
 					)}
 					<Button onClick={generate}>Generate</Button>
 				</Stack>
