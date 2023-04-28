@@ -19,12 +19,12 @@ export default function ProfilePicturePage() {
 	return (
 		<Container py={60} size="xl" h="100%" display="flex">
 			<Group position="apart" grow sx={{ flex: 1 }}>
-				<TypeCard type="hyperion" />
+				{/* <TypeCard type="hyperion" /> */}
 				<TypeCard type="noface" />
 				<TypeCard type="nusku" />
 				<TypeCard type="enki" />
 				{/* <TypeCard name="venti" /> */}
-				<TypeCard type="yugaea" />
+				{/* <TypeCard type="yugaea" /> */}
 			</Group>
 		</Container>
 	);
