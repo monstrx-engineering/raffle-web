@@ -155,7 +155,7 @@ const RaffleDetail = ({ raffle }: RaffleDetailProps) => {
 					case remaining < 1:
 						return 'Sold out';
 					default:
-						return 'Claim whitelist';
+						return 'Claim ticket';
 				}
 			}).call()}
 		</Button>
