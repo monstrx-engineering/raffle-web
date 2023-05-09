@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Check if Your Wallet is on the List</title>
+</head>
+
+<body>
+  <h1>Check if Your Wallet is on the List</h1>
+
+  <form>
+    <label for="name-input">Enter your wallet:</label>
+    <input type="text" id="name-input" name="name"><br>
+
+    <button type="button" onclick="checkName()">Check</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    function checkName() {
+      // Get the input value
+      var nameInput = document.getElementById("name-input").value;
+
+      // Define the URL of the CSV file
+      var url = "names.csv";
+
+      // Create a new XMLHttpRequest object
+      var xhr = new XMLHttpRequest();
+
+      // Set the callback function to handle the response
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          // Parse the CSV data
+          var csvData = xhr.responseText;
+          var rows = csvData.split("\n");
+          var nameList = [];
+
+          // Extract the names from the CSV data
+          for (var i = 0; i < rows.length; i++) {
+            var name = rows[i].trim();
+            if (name.length > 0) {
+              nameList.push(name);
+            }
+          }
+
+          // Check if the name is on the list
+          if (nameList.includes(nameInput)) {
+            document.getElementById("result").innerHTML = nameInput + " is on the list!";
+          } else {
+            document.getElementById("result").innerHTML = nameInput + " is not on the list.";
+          }
+        }
+      };
+
+      // Send a GET request to the CSV file URL
+      xhr.open("GET", url, true);
+      xhr.send();
+    }
+  </script>
+</body>
+
+</html>
